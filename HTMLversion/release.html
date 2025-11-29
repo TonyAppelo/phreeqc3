@@ -1,0 +1,1055 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <TITLE> PHREEQC release notes</TITLE>
+</HEAD>
+<BODY BGCOLOR="#ffffde">
+<FONT FACE="Times New Roman" NAME="Times" COLOR="red">
+<center>
+<H1>PHREEQC release notes</H1>
+</center></FONT>
+<FONT COLOR="black"  size = -1>
+
+<p><b><FONT size = +1>Pre-release notes</b></FONT>
+<p>Updated <b>PITZER.DAT</b>: SOLUTION_SPECIES: SO4-2
+<p>Updated <b>PHREEQC.DAT</b>: SOLUTION_SPECIES: SO4-2, NaSO4-1, Na2SO4, KSO4-, MgSO4, Mg(SO4)2-2, AmmHSO4-
+
+<p>Modified viscosity parameters for Br-, using high temperature data from Abdulagatov and Azizov, 2006, J.S.C. 35, 705 (NaBr), and 2008, J.S.C 37, 3 (KBr).
+<p><FONT COLOR="red">New</font> option <FONT COLOR="magenta"><b>-use_phreeqc_dha_dhb</b></font> [<b><i>True</i></b> or <b><i>False</i></b>] was added to the keyword data block LLNL_AQUEOUS_MODEL_PARAMETERS:
+<p>LLNL_AQUEOUS_MODEL_PARAMETERS
+<br><b>-use_phreeqc_dha_dhb <i>True</i></b>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AA; Debye-Hückel A and B values and the density of pure water are calculated pressure- and temperature-dependent as done with phreeqc.dat and pitzer.dat
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AA; the value of <i>bdot</i> can be defined for individual SOLUTE_SPECIES as in phreeqc.dat with -gamma <i>adot</i> <i>bdot</i>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AA; the density of the solution is calculated using the molar volume parameters (-Vm) in SOLUTION_SPECIES
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AA; the pressure dependence of log <i>K</i>'s is calculated from the molar volume parameters in SOLUTION_SPECIES and PHASES
+
+<P><b>-use_phreeqc_dha_dhb <i>False</i></b>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AA; gives results as previously with a llnl-type database, <i>i.e.</i>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AB; Debye-Hückel A and B are calculated temperature-dependent by interpolating the numbers in -dh_a and -dh_b in the LLNL_AQUEOUS_MODEL_PARAMETERS
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AB; the value of <i>bdot</i> is the same for all aqueous species, from interpolating the numbers in -bdot in the LLNL_AQUEOUS_MODEL_PARAMETERS
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AB; -Vm values are not used for calculating the pressure dependence of reactions and, if present, solution densities are not correct
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If <b>-use_phreeqc_dha_dhb</b> is written without True or False, True is assumed; if not written at all, the option is False.
+<br>The option is useful for calculating the pressure-dependent solubility of solids and gases, and extending the llnl-type database to higher ionic strengths. For example try:
+<table><tr><td>
+<pre><b><font size = -1>  <FONT COLOR="blue">DATABASE</font> c:\phreeqc\database\llnl.dat
+  <FONT COLOR="blue">LLNL_AQUEOUS_MODEL_PARAMETERS</font>; <FONT COLOR="magenta">-use_phreeqc_dha_dhb</font> 
+  # copy from phreeqc.dat...
+  <FONT COLOR="blue">SOLUTION_SPECIES</font>
+    Na+ = Na+; -gamma 4.08 0.082; -Vm 2.28 -4.38 -4.1 -0.586 0.09 4 0.3 52 -3.33e-3 0.566
+    Cl- = Cl-; -gamma 3.63 0.017; -Vm 4.465 4.801 4.325 -2.847 1.748 0 -0.331 20.16 0 1
+    Na+ + Cl- = NaCl; -log_k -1e3 # remove this complex
+  <FONT COLOR="blue">PHASES</font>
+    Halite; NaCl = Cl- + Na+; log_k 1.57; -delta_h 1.37; -Vm 27.1
+  
+  <FONT COLOR="blue">SOLUTION</font>; <FONT COLOR="blue">EQUILIBRIUM_PHASES</font>; Halite
+  <FONT COLOR="blue">REACTION_TEMPERATURE</font>; 0.5, 5, 10, 15, 20, 25, 30, 40, 50, 60, 70, 75, 80, 90, 100, 110, 125, 150, 175, 200, 225, 250, 275
+  <FONT COLOR="blue">USER_GRAPH</font>; -chart_title "Halite solubility f(T), from Pabalan & Pitzer, 1987"
+   -axis_titles "Temperature / ºC" "mol NaCl / kgw"
+    10 data 6.097, 6.099, 6.106, 6.117, 6.131, 6.146, 6.168, 6.216, 6.275, 6.341, 6.416, 6.460, 6.498, 6.587, 6.680, 6.778,\
+    6.935, 7.198, 7.573, 7.973, 8.435, 8.989, 9.649
+    20 dim c(23) : for i = 1 to step_no : read c(i) : next i
+    60 plot_xy tc, tot("Na"), symbol_size = 0, color = Red
+    70 plot_xy tc, c(step_no), line_width = 0, color = Red
+  <FONT COLOR="blue">END</font>
+  
+  <FONT COLOR="blue">USER_GRAPH 1</font>; -active false; USE solution 1; USE equilibrium_phases 1
+  <FONT COLOR="blue">REACTION_TEMPERATURE</font>; 30
+  <FONT COLOR="blue">REACTION_PRESSURE</font>; 1, 1, 22, 302, 311, 416, 823, 884, 1230, 1273, 1309, 1435, 1457
+  <FONT COLOR="blue">USER_GRAPH 2</font>; -chart_title "Halite solubility f(P) at 30ºC, from Villafáfila García, 2005"
+    -axis_titles "Pressure / bar" "mol NaCl / kgw"
+    10 data 6.16, 6.17, 6.18, 6.23, 6.23, 6.27, 6.33, 6.33, 6.36, 6.36, 6.36, 6.4, 6.4
+    20 dim c2(23) : for i = 1 to step_no : read c2(i) : next i
+    60 plot_xy pressure * 1.013, tot("Na"),  symbol_size = 0, color = Red
+    70 plot_xy pressure * 1.013, c2(step_no), line_width = 0, color = Red
+  <FONT COLOR="blue">END</font>
+</font>
+</b></pre></td>
+<TD>
+   <IMG SRC="halite_T&P.png"HEIGHT = 456 WIDTH = 282></IMG>
+</td></tr></table>
+
+<p>Corrected -Vm of K-mica in PHREEQC.DAT.
+<p>Added -Vm and modified -viscosity of SOLUTION_SPECIES HCl in PHREEQC.DAT.
+
+<p><b><FONT size = +1>Version 3.8.9, compiled October 13, 2025.</b></FONT>
+
+<p>Adapted H<sub>2</sub> and Hdg properties in SOLUTION_SPECIES and PHASES in PHREEQC.DAT and PITZER.DAT for improved solubility calculations at high <i>T, P</i>, and <i>I</i>.
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;File <b>c:\phreeqc\high_P_T\gases\H2.phr</b> compares calculations and measured data.
+
+<p>Revised the data for carbonate species in PHREEQC.DAT and PITZER.DAT for better <i>T, P</i>, and <i>I</i> dependent calcite equilibrium and viscosity calculations: <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;run the files in <b>c:\phreeqc\high_P_T\appendix_AG15\Calcite</b>.
+
+<p>Updated <b>PITZER.DAT</b>: 
+<UL><li> SOLUTION_SPECIES: Mg+2, Ba+2, CO3-2, Hdg, HCO3-, CO2. 
+<li> PHASES: Barite, Calcite, CO2(g), Hdg(g) [= H2(g)]. 
+<li> PITZER: 
+<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in -B0, -B1 and -B2: HCO3- Na+ 
+<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in -THETA: Cl- HCO3- 
+<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in -LAMDA: Cl- Hdg, Hdg Mg+2 and Hdg Na+
+<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in -ZETA: Hdg Cl- Na+ 
+<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in -PSI: Cl- HCO3- Na+
+<li> GAS_BINARY_PARAMETERS: H2O(g) Hdg(g)
+</ul>
+
+<table><tr><td>
+<FONT COLOR="black"  size = -1>
+
+Updated <b>PHREEQC.DAT</b>:
+<UL> 
+<li> SOLUTION_SPECIES: Mg+2, Ba+2, CO3-2, SO4-2, H2, Hdg, HCO3-, CO2, (CO2)2, CaHCO3+, MgSO4, Mg(SO4)2-2, NaHCO3, KHCO3, removed BaSO4. 
+<li> PHASES: Calcite, Barite, CO2(g), H2(g), Hdg(g). 
+<li> GAS_BINARY_PARAMETERS: H2O(g) H2(g), H2O(g) Hdg(g)
+</ul>
+
+<p>Revised the viscosity calculation (viscosity(cxxSurface *surf_ptr) in transport.cpp) to avoid a negative viscosity.
+
+<p>Viscosity calculations at temperatures higher than 200ºC now return the viscosity of pure water. In previous versions, the Falkenhagen A factor and the volume factors of the anions were calculated at <i>T, P</i>, <i>I</i> of the solution and used to calculate the viscosity.
+
+<p>Added two options to SIT parameters: -EPSILON1 and -EPSILON2. The  total epsilon parameter for a pair of ions is calculated as: 
+<br> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;epsilon + epsilon1 * <i>I</i> + epsilon2 * log10(<i>I</i>), where <i>I</i> is ionic strength.
+
+<p>Defined the Na<sub>2</sub>SO<sub>4</sub> complex in PHREEQC.DAT for an improved calculation of the solubilities of anhydrite, gypsum, celestite, barite and other sulfates in concentrated NaCl solutions. The activity parameters (&#8209;gamma and &#8209;analytical_expression) and the physical parameters (&#8209;Vm, &#8209;viscosity and &#8209;dw) were redefined for all the SO<sub>4</sub><sup>2-</sup> solution species. The figure compares calculated and experimental results for anhydrite as a function of <i>T</i> and <i>P</i> with the adaptations in PHREEQC.DAT.
+<br>The new numbers are in the databases distributed with version 3.8.9: run the files in <b>c:\phreeqc\high_P_T\appendix_AG15</b>.
+</font></td>
+<TD>
+   <IMG SRC="Anhydrite_NaCl_P&T.png"HEIGHT = 291 WIDTH = 337></IMG>
+</td></tr></table>
+
+<p>Removed the activity of water in the calculation of the density of pure water (rho_0) at <i>T, P</i> in calc_rho_0(LDBLE tc, LDBLE pa) in utilities.cpp (rho_0 is independent of salinity).
+
+<p>Fixed MIX to allow for negative mixing fractions.
+
+<p>In various databases: the Alkalinity of E is set to 1 to give the correct equation for non-master species with e- in the reaction:
+<br>SOLUTION_MASTER_SPECIES
+<br>E&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0
+
+
+
+<!-- <p><FONT COLOR="red"><b><i>Pre-release items:</i></b></font> -->
+<p><b><FONT size = +1>Version 3.8.7, compiled March 12, 2025.</b></FONT>
+
+<p>In the output file, the list with the 'Distribution of aqueous species' now includes, in the NPP version:
+<UL>
+<li> The fractional contribution of the species to the viscosity increase (this number can be retrieved with the Basic function <b><i>f_visc</i></b>("Ca+2")).
+<li> The transport or transference number of a species (<i>i.e.</i> the fractional contribution to the specific conductance; this number is obtained with the Basic function <b><i>t_sc</i></b>("Species_name")).
+</ul>
+
+<p>Bug_fix for calc_t_sc("") in basicsubs.cpp.
+
+<p>Added the database stimela.dat, for use in drinking-water and waste-water treatment from Peter de Moel and Omnisys.
+
+<p>Revised the -Vm parameter for Sr<sup>+2</sup> in phreeqc.dat.
+
+<p><b><FONT size = +1>Version 3.8.5, compiled November 22, 2024.</b></FONT>
+
+<p>Revised the parameters for -Vm, -viscosity and -dw for NH<sub>4</sub>SO<sub>4</sub><sup>-</sup>.
+
+<p>Bug-fix: The Donnan calculation for a surface was removed in some cases when the first kinetics' step added zero moles. If this happened it could result in an incorrect charge balance of the solution.
+
+<p>New keyword GAS_BINARY_PARAMETERS defines binary interaction coefficients of the gases used in Peng-Robinson calculations.
+
+<p>Calculation of the equivalent conductance of H<sup>+</sup> is improved with a correction of the ion-size parameter in PHREEQC.DAT and PITZER.DAT. PITZER.DAT gives results with an AARD < 0.5 % up to 10 M HCl and HBr (data from Hamer and DeWane, 1970, Nat. Stand. Ref. Data Ser. 33).
+
+<!-- <p><FONT COLOR="red"><b><i>Pre-release items:</i></b></font> -->
+<p><b><FONT size = +1>Version 3.8.3, compiled October 16, 2024.</b></FONT>
+
+<p>Revised the multicomponent diffusion calculation of heat and solutes, accounting now for the heat also for the <i>T</i>-dependent viscosity of the solutions (and thus, affecting the diffusion of solutes when temperatures vary).
+
+<p>Corrected spelling errors throughout PHREEQC as supplied by Mike Toews. Modified "lamda" to "lambda" internally as suggested by Toews, but "lamda" and 	"lambda" are both acceptable in Pitzer database files for backward compatibility.
+
+<p>Fixed bug in MIX that produced erroneous temperature and pressure if the solutions being mixed did not have 1 kg of water.
+<br>(Note that PHREEQC does not consider the heat capacity of the solutions when the temperature of the mixture is calculated.)
+
+<p><b><FONT size = +1>Version 3.8.2, compiled September 8, 2024.</b></FONT>
+
+<p>New basic items PHASE_EQUATION$("Calcite", count, sp$, coef) and SPECIES_EQUATION$("NaHCO3", count, sp$, coef) return a string with the dissolution reaction of the phase or the reaction equation for the species (defined in PHASES or in SOLUTION_SPECIES). The species-names and -coefficients of 'count' species in the formula are in the arrays 'sp$' and 'coef'.
+
+<p>The total moles added in a multicomponent diffusion model are now printed in the output file at the end of the run.
+
+<p>Added variable "viscos_DDL" in EDL("viscos_DDL", "surface_name") to give the viscosity of a Donnan layer on a surface in BASIC. 
+<br>Note that the "surface_name" should not contain an underscore "_", the Donnan properties are for the surface, not for surface charge, thus use the surface name "Hfo", not "Hfo_w". If "surface_name" is omitted, the viscosity is given for the first surface in the alphabetical order.
+
+<p>The viscosity of the Donnan layer on a surface is printed now in the output file.
+
+<p>Bug-fix: The viscosity of the Donnan layer on a surface is calculated only when defined with "-donnan 1e-7 viscosity calculate". In version 3.8.0 it was calculated at all times, when viscosity terms were read for SOLUTION_SPECIES.
+
+<p>The viscosity calculation was adapted for high concentrations of neutral species and gases. Viscosity parameters for CO<sub>2</sub> were added using data from McBride et al., 2015, JCED 60, 171-180. See example c:\phreeqc\viscosity\CO2.phr.
+<!-- <br>Modified the viscosity parameters of OH<sup>-</sup> for fitting 3M KCl-NaOH mixtures (Hefter et al., 2003, JML 103-4, p. 261-273).
+ -->
+<p><b><FONT size = +1>Version 3.8.0, compiled May 29, 2024.</b></FONT>
+
+<p><FONT COLOR="red"><b><i>New:</i></b></font> accurate calculation of the viscosity (<i>&eta;</i>) and of the specific conductance (<i>SC</i>) in saline water, with temperature and pressure dependence.
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  PHREEQC_RATES.DAT, a database with kinetic rates from Palandri and Kharaka (2004), Sverdrup et al. (2019) and Hermanská et al. (2022, 2023).
+
+<p>Bug fix in the initial calculation of the density of a solution, which might bypass Oxygen of the species when not defined. The new code prints the correct 1.000e2:
+<pre><b>  <FONT COLOR="blue">USER_PRINT</font>
+    10 print 'ppt C: ' tot("C") * tot("water") * gfw("C") / (rho * soln_vol)
+  <FONT COLOR="blue">SOLUTION</font> 1
+    -units ppt
+    -density 1 calculate
+    pH 3 charge
+    C(4) 1e2 as C
+  <FONT COLOR="blue">END</font>
+</b></pre>
+<p>New KEYWORD <FONT FACE="Courier New, monospace" COLOR="blue" size = -1><b>MEAN_GAMMAS</b></font> defines salts for which the mean gamma can be retrieved.
+<br>For example:
+<pre><FONT FACE="Courier New, monospace" COLOR="blue" size = -1><b>MEAN_GAMMAS</b></font>
+  CaCl2    Ca+2  1  Cl-    2
+</pre>
+The basic function <FONT FACE="Courier New, monospace" size = -1><font COLOR="brown"><b>meang</font>("CaCl2")</b></font> returns the mean gamma. Note that the same result can be obtained with <b>(<FONT FACE="Courier New, monospace" size = -1><font COLOR="brown">gamma</font>("Ca+2") * <font COLOR="brown">gamma</font>("Cl-")^2)^(1/3)</b></font>, which does not need MEAN_GAMMAS.
+
+<p>New KEYWORDS were programmed for entering kinetic rate parameters from the tables in Palandri and Kharaka (2004), Sverdrup et al. (2019) and Hermanská et al. (2022, 2023):
+<FONT FACE="Courier New, monospace" COLOR="blue" size = -1><b>
+<p>  &nbsp;&nbsp;RATE_PARAMETERS_PK
+<br> &nbsp;&nbsp;RATE_PARAMETERS_SVD
+<br> &nbsp;&nbsp;RATE_PARAMETERS_HERMANSKA
+</b></font>
+<p>The numbers are invoked and returned in a rate in mol/m<sup>2</sup>/s, for example for Albite, with respectively:
+<FONT FACE="Courier New, monospace" COLOR="green" size = -1><b>
+<p>  &nbsp;&nbsp;RATE_PK("Albite")
+<br> &nbsp;&nbsp;RATE_SVD("Albite")
+<br> &nbsp;&nbsp;RATE_HERMANSKA("Albite")
+</font></b>
+<p>For example:
+<pre><b>
+<FONT COLOR="blue">RATES</font>
+  <FONT COLOR="magenta">Albite_PK</font> # Palandri and Kharaka, 2004
+    5  REM PARMS: 1 affinity, 2 m^2/mol, 3 roughness, 4 exponent
+    10 if parm(1) = 1 then affinity = 1 else affinity = 1 - SR("Albite") : if affinity < parm(1) then SAVE 0 : END
+    20 rate = <FONT COLOR="green"><b>RATE_PK("Albite")</b></font>
+    30 IF M > 0 THEN area = M * parm(2) * parm(3) * (M/M0)^parm(4) ELSE area = 0
+    40 SAVE area * rate * affinity * TIME
+  -end
+</b></pre>
+can be called in:
+<pre><b>
+<FONT COLOR="blue">KINETICS 1</font>
+  <FONT COLOR="magenta">Albite_PK</font>
+    -formula NaAlSi3O8; -parms  0  6  1  0.67
+    -m0 1; -time 1 # default
+</b></pre>
+<p>The data from the compilations have been copied in <b>PHREEQC_RATES.DAT</b>, together with <b>PHASES</b> listing the minerals, and example input files showing kinetic dissolution of albite, quartz, calcite and montmorillonite, and a comparison of the rate data from the 3 compilations.
+<br>For other rate parameters, consider using the subroutines in kinetic_rates.dat and kinetic_rates.phr in c:\phreeqc\database, see <I><A href="https://www.hydrochemistry.eu/exmpls/kin_silicates.html" class="URL"> Simplifying the definition of kinetic rates for minerals using tabulated data</A></I>.
+
+<p>New option: The diffusion coefficient of a species can be made a function of the solution viscosity when diffusion is calculated. It is set by the exponent a_v_dif, the 7th number in -dw in SOLUTION_SPECIES.
+<br>For example for H+:
+<FONT FACE="Courier New, monospace" COLOR="black" size = -2><b>
+	<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOLUTION_SPECIES
+	<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;H+ = H+
+	<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-viscosity  9.35e-2  -8.31e-2  2.487e-2  4.49e-4  2.01e-2  1.570
+	<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-dw &nbsp; 9.31e-9 &nbsp; 838 &nbsp; 16.315 &nbsp; 0.809 &nbsp; 2.376 &nbsp; 24.01 &nbsp;&nbsp; <b>0.9</b>
+	<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# &nbsp;&nbsp;&nbsp; Dw(25 C) &nbsp;dw_T &nbsp;  a   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  a2 &nbsp;&nbsp;&nbsp;&nbsp;  visc &nbsp;&nbsp;  a3 &nbsp;&nbsp;&nbsp; <b>a_v_dif</b>
+  </b></font>
+<br>With a_v_dif = 0.9 in the example, the diffusion coefficient is multiplied by (<i>&eta;<sub>0, tc</sub> / &eta;</i>)<sup>0.9</sup>, where <i>&eta;<sub>0, tc</sub></i> and <i>&eta;</i> are the viscosities of water and of the solution, respectively, at the temperature of the solution. See Robinson and Stokes, 2002, Chpt 11 for examples.
+<br>The Dw and a_v_dif can be set in a USER_ program with setdiff_c("name", Dw, a_v_dif), for example: 10 print setdiff_c("H+", 9.31e-9, 1).
+<br>The viscosity effects in solution and Donnan EDL have been introduced in Example 21 of the manual, see C:\phreeqc\exmpls\ex21.phr.
+
+
+<p>Three subroutines for calculating the kinetic dissolution of silicate minerals have been defined that can be invoked by copying a line of numbers from tables in Palandri and Kharaka (2004), Sverdrup et al. (2019), or Hermanská et al. (2022, 2023). The subroutines can be read in be in a PHREEQC input file with keyword INCLUDE$. For details, see <I><A href="https://www.hydrochemistry.eu/exmpls/kin_silicates.html" class="URL"> Simplifying the definition of kinetic rates for minerals using tabulated data</A></I>.
+
+<p> The calculation of the specific conductance can now be done with a Debye-Hückel-Onsager equation that has both the electrophoresis and the relaxation term. (The standard phreeqc calculation uses a simple electrophoretic term only.) For individual ions, the equation can be multiplied with the viscosity ratio of the solvent and the solution, and the ion-size <i>a</i> in the Debye-Hückel term <i>&kappa;a</i> can be made a function of the apparent molar volume of the ion. The options are described and used in PHREEQC.DAT and PITZER.DAT.
+<br>The additions extend the applicability of the DHO equation to concentrations in the molar range, reducing AARD for <i>SC</i> and transference numbers to less than 1% in many cases. For high KHCO<sub>3</sub> concentrations, the <i>SC</i>'s indicate the presence of a KHCO<sub>3</sub> complex that was added to PHREEQC.DAT.
+<p>
+<table><tr><td width = 350px>
+<FONT COLOR="black"  size = -1>
+The figure shows the equivalent conductivity of alkali and alkaline-earth chlorides at 25 <sup>o</sup>C (symbols are measured values, lines are modeled, example file Equiv_Conduct.phr). The AARD's (average of the absolute relative deviations) are 0.18 % for NaCl, 0.48 % for KCl, 0.51 % for MgCl<sub>2</sub> and 0.89 % for CaCl<sub>2</sub>.
+<br>More example files are in c:\phreeqc\SpecConduct.
+</td>
+  <!-- <TD align= center> -->
+  <TD width = 350px; align = center>
+   <IMG SRC="ec.png"HEIGHT = 268 WIDTH = 317></IMG>
+</font></tr></table>
+
+<p>Bug-fix: Option -density c[alculate] in SOLUTION_SPREAD was corrected to give the iterated density of the solutions.
+
+<p>New option: The viscosity of the EDL layer on SURFACE(s) can now be calculated and will then be used to modify the diffusion coefficients. It is set by adding c(alculate) after viscosity, for example, "-donnan 1e-8 viscosity calc". It needs the exponent for the viscosity effect on diffusion to be different from 0. This exponent is a_v_dif, the 7th number in -dw in SOLUTION_SPECIES, as noted above.
+
+<p>Bug-fix: Viscosity of the EDL layer on SURFACE(s), defined with, for example, "-donnan 1e-8 viscosity 3", was omitted in Version 3.4.2. It is now re-introduced in the calculations.
+
+<p>Bug-fix: Basic now returns the contributions to the specific conductance (t_sc("H+")) and the viscosity (f_visc("H+")) only when the species is present in the solution. In previous versions a dummy value was returned when the species was predefined, but absent in the actual solution calculation.
+
+<p>Bug-fix: Limits for fugacity coefficients were set to be 0.01 < phi < 85 in Peng-Robinson calculations. The limits were removed in version 3.7 (when calculating H2S(g) solubilities). However, without the limits, all water turned into H2O(g) in some cases and calculations failed.
+
+<p>Added Basic function <B><i>f_visc</i></B>("H+") that returns the fractional contribution of a species to viscosity of the solution when parameters are defined for the species with -viscosity. Actually, it gives the contribution of the species to the B and D terms in the Jones-Dole equation, assuming that the A term is small. The fractional contribution can be negative, for example <B><i>f_visc</i></B>("K+") is usually smaller than zero.
+
+<p>Bug-fix: When -Vm parameters of SOLUTION_SPECIES were read after -viscosity parameters, the first viscosity parameter was set to 0.
+
+<p>Defined -analytical_expression and -gamma for Na<sub>2</sub>SO<sub>4</sub>, K<sub>2</sub>SO<sub>4</sub> and MgSO<sub>4</sub> and Mg(SO<sub>4</sub>)<sub>2</sub><sup>2-</sup> species in PHREEQC.dat, fitting the activities from pitzer.dat from 0 - 200 °C, and the solubilities of mirabilite/thenardite (Na<sub>2</sub>SO<sub>4</sub>), arcanite (K<sub>2</sub>SO<sub>4</sub>), and epsomite, hexahydrite, kieserite (MgSO<sub>4</sub> and new species Mg(SO<sub>4</sub>)<sub>2</sub><sup>2-</sup>). The parameters for calculating the apparent volume (-Vm) and the diffusion coefficients (-Dw) of the species were adapted using measured data of density and conductance (SC). Example files are in c:\phreeqc\viscosity\SO4_solubilities.
+
+<p>Removed the NaCO<sub>3</sub><sup>-</sup> complex in PHREEQC.dat since it does not fit the specific conductance measurements of Na<sub>2</sub>CO<sub>3</sub> solutions. And, the complex is negligible in seawater (Millero, 1974, Ann. Review Earth and Planetary Sciences, 2, 101-150).
+<br>Defined parameters in the -analytical_expression, -gamma, -dw, -Vm and -viscosity for the NaHCO<sub>3</sub> species in PHREEQC.dat, using the data in Appelo, 2015, Appl. Geochem. 55, 62-71. (These data were used for defining interaction parameters in pitzer.dat.)
+The parameters for the apparent volume (-Vm), the diffusion coefficient (-Dw) and the viscosity of CO<sub>3</sub><sup>2-</sup> and HCO<sub>3</sub><sup>-</sup> were adapted using measured data of density, conductance and viscosity of binary solutions.
+
+<p>The viscosity of the solution at <i>P, T</i> is now calculated and printed in the output file, and can be retrieved in Basic programs with the function <i><b>viscos</b></i> (in previous versions, viscos returned the viscosity of pure water at <i>P, T</i>).
+<br>The calculation uses a modified Jones-Dole equation which sums the contributions of individual solutes:
+<br>&nbsp;&nbsp;&nbsp;  <i>&eta; / &eta;<sub>0</sub></i> = 1 + <i>A</i> &radic;(0.5 &sum; <i>z<sub>i</sub>m<sub>i</sub></i>) + &sum; <i>f<sub>an</sub></i> (<i>B<sub>i</sub>m<sub>i</sub></i> + <i>D<sub>i</sub>m<sub>i</sub>n<sub>i</sub></i>),
+<br> where <i>&eta;</i> is the viscosity of the solution (mPa s), <i>&eta;<sub>0</sub></i> idem of pure water at the temperature and pressure of the solution, <i>m<sub>i</sub></i> is the molality of species <i>i</i>, made dimensionless by dividing by 1 molal, and <i>z<sub>i</sub></i> is the absolute charge number.
+<br> <i>A</i> is derived from Debye-H&uuml;ckel theory, and <i>f<sub>an</sub>, B, D</i> and <i>n</i> are coefficients that incorporate volume, ionic strength and temperature effects.
+<br>The coefficients are:
+<br>&nbsp;&nbsp;&nbsp;  <i>B</i> = <i>b<sub>0</sub></i> + <i>b<sub>1</sub></i> exp(-<i>b<sub>2</sub> tc</i>)
+<br> where <i>b<sub>0..2</sub></i> are coefficients, and <i>tC</i> is the temperature in ºC. The temperature is limited to 200°C.
+<br>&nbsp;&nbsp;&nbsp;  <i>f<sub>an</sub></i> = (2 - <i>t<sub>an</sub></i> <i>V<sub>an</sub></i> / <i>V</i><sub>Cl<sup>-</sup></sub>)
+<br> for anions, with <i>t<sub>an</sub></i> a coefficient and <i>V<sub>an</sub></i> the <i>P, T</i> and <i>I</i> dependent, apparent volume of the anion relative to the one of Cl<sup>-</sup>, which is used as reference species. For cations, <i>f<sub>an</sub></i> = 1 and <i>t<sub>an</sub></i> needs not be defined.
+<br>&nbsp;&nbsp;&nbsp;  <i>D</i> = <i>d<sub>1</sub></i> exp(-<i>d<sub>2</sub> tC </i>)
+<br> where <i>d<sub>1, 2</sub></i> are coefficients.
+<br>&nbsp;&nbsp;&nbsp;  <i>n</i> = ((1 + <i>f<sub>I</sub></i>)<i><sup>d<sub>3</sub></sup></i> + ((<i>z<sub>i</sub></i><sup>2</sup> + <i>z<sub>i</sub></i>) / 2 &middot; <i>m<sub>i</sub></i>)<i><sup>d<sub>3</sub></sup></i> / (2 + <i>f<sub>I</sub></i>)
+<br> where <i>f<sub>I</sub></i> averages ionic strength effects and <i>d<sub>3</sub></i> is a coefficient.
+<br>The coefficients are fitted on measured viscosities of binary solutions and entered with item -viscosity under keyword SOLUTION_SPECIES, for example for H<sup>+</sup>:
+<!-- <table><tr><td>
+<ul>
+ -->  <FONT FACE="Courier New, monospace" COLOR="black" size = -2>
+	<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SOLUTION_SPECIES
+	<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;H+ = H+
+	<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-viscosity  9.35e-2  -8.31e-2  2.487e-2  4.49e-4  2.01e-2  1.570 &nbsp;&nbsp; 0
+	<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; b0 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; b1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; b2 &nbsp;&nbsp;&nbsp;&nbsp; d1 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; d2 &nbsp;&nbsp;&nbsp;&nbsp; d3 &nbsp;&nbsp;&nbsp; tan
+  </font>
+<!-- </ul></td></tr></table> -->
+<table><tr><td>
+<FONT COLOR="black"  size = -1>
+When the solute concentrations are seawater-like or higher, the viscosity is different from pure water as shown in the figure (symbols are measured values, lines are modeled, example file seaw.phr). To obtain a valid model for natural waters with phreeqc.dat, the complexes of SO<sub>4</sub><sup>2-</sup> with the major cations were redefined, as noted above.
+<br>The <i>A</i> parameter in the Jones-Dole equation needs temperature dependent diffusion coefficients of the species, and therefore the parameters for calculating the <i>I</i> and <i>T</i> dependency of the diffusion coefficients (-dw parameters of SOLUTION_SPECIES) were refitted for SO<sub>4</sub><sup>2-</sup> and CO<sub>3</sub><sup>2-</sup> species.
+<br>Example files are in c:\phreeqc\viscosity.
+</td>
+  <TD valign= center>
+   <IMG SRC="seaw_visc.png"HEIGHT = 260 WIDTH = 330></IMG>
+</tr></table>
+
+<p>Implicit calculations with option -fix_current will now account for changing concentrations in the boundary solutions of the column.
+
+<p>Activated the print of statements defined in USER_PRINT when the initial EXCHANGE, SURFACE and GAS_PHASE are calculated.
+
+<p>Changed the dw_t parameter for CO<sub>3</sub><sup>2-</sup> to 30 (was 0) and for HCO<sub>3</sub><sup>-</sup> to -150 (was 0) to better fit McCleskey's data</p>
+
+<p>Bug fix: removed the factor (TK / 298.15) from the calculation of the temperature dependence of the diffusion coefficient. For an example, see the calculation of Dw(<i>TK</i>) of H+ in the next paragraph. </p>
+
+<p>Bug fixes in printing/punching of diffusion coefficients with diff_c and setdiff_c: the numbers are now corrected for <i>I</i> and <i>T</i> effects when the appropriate factors are defined in keyword SOLUTION_SPECIES, item -dw. For example:
+<p>H+ = H+
+<br>&nbsp;&nbsp;&nbsp; -gamma	9.0	0
+<br>&nbsp;&nbsp;&nbsp; -dw	<b>9.31e-9  1000  0.46  1e-10</b> # The dw parameters are defined in Appelo, 2017, CCR 101, 102-113.
+<br>It will set Dw(<i>TK</i>) = <b>9.31e-9</b> * exp(<b>1000</b> / TK - <b>1000</b> / 298.15) * viscos_0_25 / viscos_0_tc
+<br>and Dw(<i>I</i>) = Dw(<i>TK</i>) * exp(-<b>0.46</b> * DH_A * |<i>z<sub>i</sub></i>| * <i>I</i><sup> 0.5</sup> / (1 + DH_B * <i>I</i><sup> 0.5</sup> * <b>1e-10</b> / (1 + <i>I</i><sup> 0.75</sup>))),
+<br>where
+<br>&nbsp;&nbsp;&nbsp; viscos_0_25 is the viscosity of pure water at 25 °C, viscos_0_tc is the viscosity of pure water at the temperature of the solution.
+<br>&nbsp;&nbsp;&nbsp; DH_A and DH_B are Debye-H&uuml;ckel parameters, retrievable with PHREEQC Basic.
+<br>The temperature correction is always applied in multicomponent, diffusive transport and for calculating the viscosity.
+<br>The ionic strength correction is for electro-migration calculations (Appelo, 2017, CCR 101, 102). The correction is applied when the option is set true in TRANSPORT, item -multi_D:
+<br>&nbsp;&nbsp;&nbsp; -multi_d true 1e-9 0.3 0.05 1.0 true # multicomponent diffusion
+<br># true/false, default tracer diffusion coefficient (Dw = 1e-9 m2/s) in water at 25 °C (used in case -dw is not defined for a species), porosity (por = 0.3), limiting porosity (0.05) below which diffusion stops, exponent n (1.0) used in calculating the pore-water diffusion coefficient Dp = Dw * por^n, true/false: correct Dw for ionic strength (false by default).
+</p>
+
+<!-- <p>Added option correct_D in keyword SURFACE, item -Donnan, to obtain a better match of co-ion concentrations in the Donnan volume and the Poisson-Boltzmann integrated DDL concentrations. For example:
+
+<p>&nbsp;&nbsp;&nbsp; -donnan <b>1e-8</b> viscosity <b>0.5</b> limit <b>0.9</b> correct_D <b>true</b>
+
+<br>will set the DDL thickness to <b>1e-8</b> m, apply a viscosity of <b>0.5</b> relative to 'free' water when DDL solutes are diffusing, limit the fraction of DDL water to <b>0.9</b>, and with correct_D <b>true</b> will (usually) increase the Donnan calculated co-ion concentrations (and the counter-ions to keep the charge balance).
+<br>When correct_D is <b>false</b> (default), the concentration of ion <i>i</i> is:
+<p>&nbsp;&nbsp;&nbsp; c<sub><i>i, DL</i></sub> = c<sub><i>i, free</i></sub> * exp(-z<sub><i>i</i></sub> * &psi;<sub><i>DL</i></sub> * F / RT )
+<p>When correct_D is <b>true</b> and &psi;<sub><i>DL</i></sub> * z<sub><i>i</i></sub> > 0 (thus for a co-ion), the concentration of i is:
+<p>&nbsp;&nbsp;&nbsp; c<sub><i>i, DL</i></sub> = c<sub><i>i, free</i></sub> * exp(-z<sub><i>i</i></sub> * &psi;<sub><i>DL</i></sub> * F / RT * 0.921 * (<i>I</i>^(0.0491 * abs(z<sub><i>i</i></sub>) * nDbl^0.844 * (abs(surf_chrg_eq / A_surf / 1e-6)^0.362))
+<p>where <i>I</i> is the ionic strength, nDbl is the thickness of the DDL in Debye-lengths, surf_chrg_eq / A_surf is the surface charge in eq / m<sup>2</sup>.
+ -->
+<p><b><FONT size = +1>Version 3.7.3: December 2, 2021.</b></FONT>
+
+<p>Bug fix of -print_cells and -punch_cells in the ADVECTION data block with ranges of cells defined with "-". For example, the cells defined with
+<br>&nbsp;&nbsp;&nbsp; ADVECTION
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; -punch_cells 1-10 11 12-20
+<br>were read incorrectly.</p>
+
+<p>Modified the initial guess of the potential terms for a surface related to a phase, when it comes into existence (when the phase begins to precipitate).</p>
+
+<p>Bug fix in printing/punching of diffusion coefficients with diff_c and setdiff_c: the numbers were not multiplied with TK / 298.15.
+
+<p><b><FONT size = +1>Version 3.7.2a: September 14, 2021.</b></FONT>
+
+<p>Bug fix in multicomponent diffusion.
+
+<p><b><FONT size = +1>Version 3.7.2: August 26, 2021.</b></FONT>
+
+<p>Bug fix of implicit calculations with -fix_current, the current and cell potentials were set to 0 after the calculations, before printing/punching.
+
+<p>Added Basic functions for printing/punching mole transfers of solute species from a cell by multicomponent diffusion:
+<br>MCD_JTOT("Na+") gives total moles of Na<sup>+</sup> diffusing from/into a cell.
+<br>MCD_JCONC("Na+") gives moles of Na<sup>+</sup> diffusing from/into a cell by the concentration gradients of Na<sup>+</sup>.
+<Br>Diffusion is <i>uphill</i> when MCD_JTOT("Na+") * MCD_JCONC("Na+") < 0.
+
+<p><b><FONT size = +1>Database update: July 20, 2021.</b></FONT>
+<table><tr><td>
+<FONT COLOR="black"  size = -1>
+<br>Improved and extended the solubility model for H<sub>2</sub>S in PHREEQC.DAT and PITZER.DAT, 0 - 300°C, 1 - 987 atm, using experimental data from Jiang et al., 2020, Chem. Geol. 555, 119816 and Xia et al., 2000, Ind. Eng. Chem. Res. 39, 1064.
+<br>Example files are in directory c:\phreeqc\high_P_T.
+</td>
+  <TD valign= center>
+   <IMG SRC="H2S.png"HEIGHT = 200 WIDTH = 471></IMG>
+</tr>
+</table>
+
+<p><b><FONT size = +1>Version 3.7.1: July 20, 2021.</b></FONT>
+
+<p>Improved the convergence of calculations with GAS_PHASE with numerical derivatives. (Numerical derivatives are used with Pitzer, and are a fall-back for other calculation models when convergence fails.)</p>
+
+<p>The limits for phi of all gases and for the pressure of H<sub>2</sub>O gas were removed (previously, &phi; >= 0.05, <i>P</i>_H<sub>2</sub>O <= 90 atm in prep.cpp).
+
+<p>Code was revised to remove temperature and pressure limits for llnl-type databases. Previously, limits of 350 C and 1500 atm were applied to all databases. These limits were removed for databases that define LLNL_AQUEOUS_MODEL_PARAMETERS. It is assumed that for llnl-type databases all temperature and pressure effects are defined by the LLNL_AQUEOUS_MODEL_PARAMETERS data block and the temperature expressions for log10(K)s of the aqueous species and phases. Implicitly, pressure for an llnl-type database is either fixed or a function of temperature.
+<br>In addition, the molar volume of water was set to zero for llnl-type databases. The molar volume of water was calculated as a non-zero value for all databases. Thus, there was a pressure dependence for log10(K) for reactions involving water. For llnl-type databases, all molar volumes should be zero, and all temperature and pressure dependence should be defined through LLNL_AQUEOUS_MODEL_PARAMETERS and log10 Ks.
+
+<p>Added extra information for some ERROR messages related to -formula definitions in KINETICS.
+
+<p>Added an optional 6th argument to Basic function SYS that controls the sort order of the output. SYS(..) returns the total moles of an element and provides the distribution of the species with their name, type and moles in all phases in arrays.
+<br>SYS("Element-name", count, name$, type$, moles, 0) sorts by decreasing moles (default).
+<br>SYS("Element-name", count, name$, type$, moles, 1) sorts by alphabetical order of the names.
+
+<p>Added Basic functions:
+<br>DELTA_H_PHASE("Calcite") returns the reaction enthalpy in KJ/mol at reaction temperature if an analytic expression exists, or else at 25 °C.
+<br>DELTA_H_SPECIES("CaHCO3+") returns the reaction enthalpy in KJ/mol at reaction temperature if an analytic expression exists, or else at 25 °C.
+<br>DH_A0(Na+")  returns the Debye-H&uuml;ckel ion size parameter for the species (&Aring;).
+<br>DH_BDOT("Na+") returns the Debye-H&uuml;ckel ionic strength coefficient for the species.
+<br>SETDIFF_C("CO3-2", 1.18e-9) sets the diffusion coefficient (dw) for a species and returns the calculated diffusion coefficient at reaction temperature.
+
+<p>Added an option for mixing the 2 column-boundary solutions in electro-migration with keyword MIX. In experiments, such mixing can counter the pH- and pe-changes that accompany the electrode reactions that occur with electromigration and affect the current and the speciation in the column. It needs a setup with identical boundary solutions, and the tracer added in the column (not in a boundary solution), see Li et al., 2020, J. Contam. Hydrol. 231, 103585.
+<br>For example with 10 (mobile) cells:
+<br>&nbsp;&nbsp;&nbsp;&nbsp;MIX  0;  0 0.9; 11 0.1 # solutions 0 and 11 have equal water
+<br>&nbsp;&nbsp;&nbsp;&nbsp;MIX 11; 11 0.9;  0 0.1
+<br>Mixing will be done with each mixrun.
+</p>
+
+<p><b><FONT size = +1>Version 3.6.5: February 24, 2021.</b></FONT>
+<p>Bug fix of removal of Donnan layer calculations when kinetic reactions are zero in Runge-Kutta calculations.</p>
+
+<p>SI's of phases are now printed with the phase mole transfers found by INVERSE_MODELING. This is useful for checking that dissolving and precipitating phases are sub- and supersaturated, respectively.</p>
+
+<p>Added Basic functions for formatting punch files:
+<br>'eol_notab$' writes a new line (<i>\r\n</i>) without a tab (eol$ writes the new line with a tab).
+<br>'no_newlines' with punch, omits writing a new line (<i>\r\n\t</i>). For example, '20 if step_no = 0 then punch no_newlines else punch cell_no, SC'. (New lines can be omitted altogether with SELECTED_OUTPUT; -new_line false.)
+<br>'add_heading("DL")' returns the number of headings and adds the heading when the selected_output file is newly defined. For example, '10 print add_heading("DL")'.
+
+<p><b><FONT size = +1>Database update: December 23, 2020.</b></FONT>
+
+<p>Added the file 'kinetic_rates.dat' with subroutines for calculating mineral dissolution rates from Palandri and Kharaka (2004) and Sverdrup et al. (2019). It facilitates the use of the kinetic rates for various minerals compiled by these authors.
+<br>The data are entered in a KINETICS block with -parms. In the RATES block, they are stored in memory for subroutines that do the calculations. The subroutines are called with calc_value("Palandri_rate") or calc_value("Sverdrup_rate").
+<br>For example, the Palandri rate for albite, in the file kinetic_rates.phr, also in the database directory:
+
+<table><tr><td>
+<ul>
+  <FONT FACE="Courier New, monospace" COLOR="black" size = -2>
+  <br>INCLUDE$ c:\phreeqc\database\kinetic_rates.dat
+  <br>
+  <br>KINETICS 1
+  <br>Albite_PK
+  <br>-formula NaAlSi3O8
+  <br>
+  <br># parms affinity_factor m^2/mol roughness, lgkH  e_H  nH, lgkH2O e_H2O, lgkOH e_OH nOH
+  <br># parm number        1       2          3,    4    5   6,      7     8,   9     10  11
+  <br>
+  <br>-parms    0 1 1,    -10.16 65.0 0.457,   -12.56 69.8,   -15.60 71.0 -0.572  # parms 4-11 from TABLE 13
+  <br>
+  <br>RATES
+  <br>Albite_PK # Palandri and Kharaka, 2004
+  <br>10 if parm(1) = 1 then affinity = 1 else affinity = 1 - SR("Albite") : if affinity < parm(1) then SAVE 0 : END
+  <br>20 put(affinity, -99, 1) # store number in memory
+  <br>30 for i = 2 to 11 : put(parm(i), -99, i) : next i
+  <br>40 SAVE calc_value("Palandri_rate")
+  <br>-end
+  <br></font>
+</ul>
+</td>
+  <TD valign= center>
+   <IMG SRC="Albite_rates.png"HEIGHT = 204 WIDTH = 241></IMG>
+</tr>
+</table>
+
+Numbers for the '<i>-parms</i>' can be copied from the tables in the publications; enter zero when unavailable.
+<P><b>References</b>
+<br>Palandri, J.L. and Kharaka, J.K. (2004). A compilation of rate parameters of water-mineral interaction kinetics for application to geochemical modeling. USGS Open-File Report 2004-1068.
+<br>Sverdrup, H.U., Oelkers, E., Erlandsson Lampa, M., Belyazid, S., Kurz, D. and Akselsson, C. (2019). Reviews and Syntheses: weathering of silicate minerals in soils and watersheds: parameterization of the weathering kinetics module in the PROFILE and ForSAFE models. Biogeosciences Discuss. 1-58.
+
+<p>Added a selection of concrete minerals in Concrete_PHR.dat and Concrete_PZ.dat; the latter has Pitzer coefficients for Al(OH)<sub>4</sub><sup>-</sup> using data from Wesolowski, D.J. (1992). GCA 56, 1065-1091. The Pitzer coefficients for Al are valid only in basic solutions, pH > 9.
+The log_k's  are from Appelo, 2021, CCR 140, https://doi.org/10.1016/j.cemconres.2020.106270.
+<br>Read the file in your input file with
+<br>&nbsp;&nbsp;&nbsp;&nbsp;INCLUDE$ c:\phreeqc\database\concrete_phr.dat
+<br>or, when using Pitzer.dat:
+<br>&nbsp;&nbsp;&nbsp;&nbsp;INCLUDE$ c:\phreeqc\database\concrete_pz.dat
+
+<p>Modified the -analytical_expression for calcite in phreeqc.dat, with data from Ellis (1959) and Plummer and Busenberg (1982) used in pitzer.dat.
+<p>Modified the -analytical_expression for dolomite in phreeqc.dat and pitzer.dat, using data at 25°C from Hemingway and Robie (1994) and 50-175°C from Bénézeth et al. (2018), GCA 224, 262-275.
+
+<p><b><FONT size = +1>Version 3.6.4: September 10, 2020.</b></FONT>
+
+<p>Revised the calculation of implicit electro-migration. Concentration-oscillations in 3 cells at the column boundaries are now dampened, which improves the stability of the calculations.</p>
+
+<p>Added a basic function 'debye_length' that returns the Debye length, &kappa;<sup>-1</sup> (m/(mol/L)<sup>0.5</sup>). The Debye length is a function of the dielectric constant of the solution, the temperature and the (inverse) ionic strength.</p>
+
+<p>SURFACE and EXCHANGE were not updated correctly when related to a mineral and the moles of mineral were changed with EQUILIBRIUM_PHASES, EQUILIBRIUM_PHASES_MODIFY, EQUILIBRIUM_PHASES_RAW, or EQUILIBRIUM_PHASES_MIX. Incorrect updating also occurred when related to a kinetic reaction and the moles of kinetic reaction were changed with KINETICS, KINETICS_MODIFY, KINETICS_RAW, or KINETICS_MIX. Now, the correct proportional relation should be maintained if the moles in EQUILIBRIUM_PHASES or KINETICS are changed.
+<br>An error message will result if, for example, EQUILIBRIUM_PHASES is modified to remove the phase that EXCHANGE is related to.
+
+<!--FONT FACE="Courier New, monospace" COLOR="black" size = -1></font-->
+<p><b><FONT size = +1>Version 3.6.3: February 22, 2020.</b></FONT>
+
+<p>Improved diffusion calculation in a heterogeneous column with cells that have Donnan layers (DL) or not, for example an experiment with clay confined by filters.
+<br>At the interface of the clay and the filter, the ion concentrations at the DL change step-wise even at steady state.
+Comparison with experimental data (Glaus, pers.comm.) shows that it can be calculated with a small number of cells by taking the harmonic mean for the free pore water part, and the average for the DL part of the interface. The overall flux is reduced too much when the harmonic mean is used for the combination of both. (The combination was introduced in Version 3.4.2.)
+</p>
+
+<p>Bug fix for possibly incorrect transport calculation of multivalent ions in the Donnan layer.</p>
+
+<p><b><FONT size = +1>Version 3.6.2: January 28, 2020</b></FONT>
+
+<p>Added silicate sorption to Hfo_w from Swedlund, P.J. and Webster, J.G., 1999,
+Water Research 33, 3413-3422 in phreeqc.dat, pitzer.dat, and wateq4f.dat.
+
+<p>Fixed memory error in TRANSPORT if number of porosities exceeded the number of cells.
+
+<p><b><FONT size = +1>Version 3.6.1: January 7, 2020</b></FONT>
+
+<p>Fixed bug in TRANSPORT. The function GFW was used in a Basic program
+on elements that were not found in the database, increasing the
+count of elements. The original number of elements was used to allocate space
+for transport, but the incremented number was used to free space, which caused
+a segmentation fault.
+
+<p><b><FONT size = +1>Version 3.6.0: December 2, 2019</b></FONT>
+
+<p>Bug fix in pointers to the input structure that could produce an error in the .._MIX keywords.</p>
+
+<p>Bug fix in transport of colloids from mobile to stagnant cells and vice versa (special basic function CHANGE_SURF). It may have produced incorrect results in versions 3.5.1 and 3.5.2.
+
+<p><b><FONT size = +1>Version 3.5.2: August 10, 2019</b></FONT>
+
+<p>Implicit calculation of multicomponent diffusion was extended with 1 stagnant layer in the column, and options were added:
+<br>-- When the mixing factor (defined with keyword MIX) is omitted for the boundary solution and the adjacent stagnant cell, the implicit model calculates a mixing factor for the boundary stagnant cell, multiplying the mixing factor for the mobile cell (this is cell 1 or cell <i>'cells'</i>) with the ratio of the kgs of water in the stagnant cell and the mobile cell, see e.g. Fig. 2 of Appelo et al., 2010, GCA 74, p. 1205. Diffusion into the stagnant cell can be omitted, defining a mixing factor of 0. For example for a column with <i>'cells'</i> = 4, stagnant cell = <i><b>6</b></i>, boundary solution 0: MIX 0; <i><b>6</b></i> 0.
+<br>-- Thermal diffusion with the stagnant cells will be calculated when temperatures differ by more than 0.1 °C. Multicomponent diffusion coefficients decrease with the viscosity of the solution, markedly affecting the results. File <A href="file://c:\phreeqc\exmpls\ex12b.phr"> <i>ex12b.phr</i></A> in c:\phreeqc\exmpls compares traditional and multicomponent diffusive transport of heat and solutes with temperatures changing from 0 to 25 °C.
+
+<p>The activity-coefficient effect for multicomponent diffusion <i>f</i> = 1 + &Delta;log10(&gamma;) / &Delta;log10(<i>m</i>) is now applied only if 0.2 < <i>f</i> < 2.25. The factor is not applied in implicit calculations.
+
+<p>Added an option to define the minimal log10(molality) of a species for including it in multicomponent diffusion. The definition is done with option -implicit false/true 1 -30 under keyword TRANSPORT, where 1 and -30 are the default max_mixf and default minimal log10(molality) (= min_dif_LM), respectively. The recommended value for min_dif_LM is -12.</p>
+
+<p>Removed the limit, set in Version 3.5.1, that transported moles had to be > 1e-15 in multicomponent diffusion.</p>
+
+<p>Bug fix in Version 3.5.1 that could bypass the calculation of diffusion through the Donnan layer.</p>
+
+<p>Added an option to use the chemical model structure of the previous calculation for specific cells with option -same_model under keyword TRANSPORT. For example, -same_model 2-5 8-11 will use for cells 2-5 the model defined for cell 1, and for cells 8-11 the model defined for cell 7. For cells 0 and 1, and 6 and 7, the model is set-up with the default 'check_same_model' in prep.cpp.</p>
+
+<p>Corrected memory leaks in implicit calculations of diffusive transport.</p>
+
+<p><b><FONT size = +1>Version 3.5.1: May 29, 2019</b></FONT>
+
+<p>Added an implicit algorithm that allows for large timesteps when diffusion is calculated. It will be used when <b><i>-implicit true</i> 1</b> is set under keyword TRANSPORT, where <b>1</b> =
+<i>'max_mixf'</i> = <i>D * &Delta;t</i> / <i>&Delta;x</i><sup>2</sup>. The default value of <i>max_mixf</i> = 1, but it can be increased often to > <b>4</b>, depending on the required accuracy and the chemistry of the system, and the calculations will be about an order faster.
+<br>With implicit <i>true</i>, electro-migration is calculated more stable and usually without (possibly) disturbing warnings of 'negative moles', see <I><A href="https://hydrochemistry.eu/exmpls/electro_dif.html" class="URL"> Electro-migration and electro-remediation</A></I>.
+The implicit calculations have been implemented for a regular column, not for stagnant cells, and not for interlayer diffusion.
+
+<p>The activity-coefficient effect for multicomponent diffusion was modified, previous versions could give an erroneous large correction.
+
+<p>The column boundary cells 0 and count_cells + 1 are now print-/punched by default when the boundary conditions are not 'closed'.
+
+<p><b><FONT size = +1>Version 3.5.0: March 26, 2019</b></FONT>
+
+<p>New IPhreeqc and PhreeqcRM modules may facilitate interfacing with other computer programs via libs and dlls. Download from the <I><A href="https://www.usgs.gov/software/phreeqc-version-3" class="URL"> USGS site</A></I>.
+
+<p>CVODE`s progress variables (overall time, time-step, calls) are displayed in the status window when kinetic rates are calculated.
+
+<p>Bug fix of GAS_PHASE_MIX with -fixed_pressure members.
+
+<p>Revised numerical method for solid solutions to respond better to
+	KNOBS; -step and -pe_step convergence parameters.</p>
+
+<p><b><FONT size = +1>Version 3.4.8: January 18, 2019</b></FONT>
+
+<p>Bug fix of incorrect mass added in solid solutions with a component containing an element not present initially, but added with INCREMENTAL_REACTIONS.</p>
+
+<p>Updated the PHREEQC help file with descriptions of the .._MIX keywords (SOLUTION_MIX, EQUILIBRIUM_PHASES_MIX, etc.).
+<br>The .._MIX keywords combine fractions of previously defined keyword blocks and facilitate the modification of keyword blocks. For an example, see keyword GAS_PHASE in the help file. </p>
+
+<p>Enabled active_fraction factors for EXCHANGE_SPECIES in Pitzer activity models, and generally improved the convergence of exchange calculations with active_fraction factors.
+<br>Active_fraction factors are useful for modeling non-ideal ion exchange, see <I><A href="https://hydrochemistry.eu/exmpls/a_f.html" class="URL"> Active fraction model for varying exchange selectivity</A></I>.
+<br>The <I><A href="https://hydrochemistry.eu/exmpls/aquia.html" class="URL"> aquia example</A></I> now runs 3 times faster than before.
+
+<p>The number of mixruns in a diffusion/dispersion model is limited to the largest 32 bit integer (= 2^31) to avoid an integer fault. When exceeded, an error message is printed with the suggestion to decrease the time_step, and/or increase the cell-lengths. </p>
+
+<p><b><FONT size = +1>Version 3.4.7: October 2, 2018</b></FONT>
+
+<p>Bug fix in multicomponent diffusion with changing porosities. Without interlayer diffusion, an error resulted when the porosity in a cell was below the limiting porosity.</p>
+
+<p>The activity calculation of exchange species can be omitted with option '-exchange_gammas false' in keyword EXCHANGE (default is 'true'). Previous versions ignored this option in non-Pitzer activity models.</p>
+
+<p>Bug-fix for the activity calculation of Gapon-type exchange species in non-Pitzer activity models. Ca0.5X now uses (&gamma;Ca<sup>2+</sup>)<sup>0.5</sup>,
+and log gamma (Ca0.5X) = 0.5 * log gamma (Ca<sup>2+</sup>) as should be. Previous versions calculated the gamma with the charge of the exchanger (z = -1 of X in Ca0.5X).</p>
+
+<p><b><FONT size = +1>Version 3.4.6: June 20, 2018</b></FONT>
+
+<p>The solid solution calculation in the Pitzer-model was copied from the numerical derivatives used in the ion-association model.</p>
+
+<p>Bug-fix for porosities, which could be set incorrectly when porosities were not defined in TRANSPORT simulations with more cells than before.</p>
+
+<p>Modified the diffusion properties for (possible) boundary cells in stagnant calculations with enhanced transport through a Donnan layer.
+In version 3.4.2, the harmonic mean of all the diffusional properties was introduced for all the stagnant cells.
+<br>However, many models use cell 3 and cell [2 + stagnant cells] as outer, well-mixed reservoir solutions, and diffusion is then determined by the properties of the boundary cells in the column (similar to the regular column, where cells 0 and [cells + 1] are well-mixed). If cells 3 and [2 + stagnant cells] are without a surface with a Donnan layer, they are taken as well-mixed now. <br>Thus:
+<br> &nbsp;&nbsp;cell 3 without donnan layer, cell 4 with a donnan layer: diffusion is determined by the properties of cell 4.
+<br> &nbsp;&nbsp;cell 3 without donnan layer, cell 4 without a donnan layer: diffusion is determined by the harmonic mean of the properties of cells 3 & 4.
+<br>PHREEQC's choice can be manipulated, adding a surface with a very small number of sites and a tiny Donnan layer in cell 3 and/or the cells it diffuses into, and similar for cell [2 + stagnant cells]. See for example <I><A href="https://www.hydrochemistry.eu/exmpls/opa_col3.phr" class="URL"> opa_col3.phr</A></I>.
+</p>
+
+<p>A Donnan layer on SURFACEs can now be calculated with Pitzer activity models.</p>
+
+<p>Bug-fixes for option -numerical_derivatives in KNOBS, setting it true may improve convergence of donnan layer calculations (or not).
+<br>Overall iterations (this is, all the calls to CL1 in a reaction step) are printed in the output file if different from the iterations in the final set. It can be USER_PRINTed/PUNCHed with the variable 'iterations'.
+
+<p>Streamlined the output of -debug_prep in KNOBS. Added options -debug_mass_balance (total moles of elements), and -debug_mass_action (species data: log_k, dz, reaction stoichiometry).</p>
+
+<p>The numbers in the matrix for CL1 can be inspected in my_array[row * (count_unknowns + 1) + col]
+
+<p><b><FONT size = +1>Version 3.4.5: May 7, 2018</b></FONT>
+
+<p>Added the Soreide and Whitson interaction coefficients of H2O(g) and Mtg(g) in the code.</p>
+
+<p>Bug fix of option '-new_line false/true' in SELECTED_OUTPUT, new_line was not initialized to 'true' in the phreeqc.exe.
+
+<p><b><FONT size = +1>Version 3.4.4: April 30, 2018</b></FONT>
+
+<p>Removed warnings about coupling of surface and equilibrium_phase. For example, montmorillonite can be made a cation exchanger:
+<br>&nbsp;&nbsp;PHASES
+<br>&nbsp;&nbsp;&nbsp;&nbsp;  Summ_Montmorillonite; Al2.33Si3.67O10(OH)2-0.33 + 12 H2O = 2.33 Al(OH)4- + 3.67 H4SiO4 + 2 H+; -log_k -44.4
+<br>&nbsp;&nbsp;SURFACE_MASTER_SPECIES
+<br>&nbsp;&nbsp;&nbsp;&nbsp;  Summ Summ-
+<br>&nbsp;&nbsp;SURFACE_SPECIES
+<br>&nbsp;&nbsp;&nbsp;&nbsp;  Summ- = Summ-
+<br>&nbsp;&nbsp;SOLUTION 1; Na 10; Cl 10; pH 7 charge; C(4) 1 CO2(g) -2
+<br>&nbsp;&nbsp;EQUILIBRIUM_PHASES 1
+<br>&nbsp;&nbsp;&nbsp;&nbsp;  Ca-Montmorillonite 0 1e-3
+<br>&nbsp;&nbsp;&nbsp;&nbsp;  Summ_Montmorillonite 0 0
+<br>&nbsp;&nbsp;SURFACE 1
+<br>&nbsp;&nbsp;&nbsp;&nbsp;  Summ Summ_Montmorillonite 0.33 3.11e5
+<br>&nbsp;&nbsp;&nbsp;&nbsp;  -donnan; -equil 1
+<br>&nbsp;&nbsp;END
+</p>
+
+<p> Added option '-new_line false/true' in SELECTED_OUTPUT. If true, starts a punch declaration on a new line (default). If false, the new line must be written explicitly, for example: 10 punch eol$ + str_e$(tot("Na"), 18, 13)
+
+<p>Bug fix in the Donnan calculation of a positive surface: the surface charge could go to unsolvable numbers, but is now limited to +5e3 equivalents, similar to the limit of -5e3 equivalents for the negative surface charge.
+
+<p>Bug fix in the Donnan calculation of a surface coupled to a kinetic reactant: the amounts of water could be distributed incorrectly over free and DL water.
+
+<p>CVODE and RK now calculate the combination of an irreversible reaction and kinetics in the same way. In previous versions, CVODE added the reaction after the kinetic step was calculated, RK adds the reaction at the start.
+
+<p><b><FONT size = +1>Version 3.4.3: March 9, 2018</b></FONT>
+
+<p>Bug fix in TRANSPORT with stagnant zones: solutions were not updated when mixing was not defined for the highest number of the stagnant cells.
+
+<p>Bug fix in multicomponent diffusion through a Donnan layer: a SURFACE without any charged-surface component could give a segmentation fault.
+
+<p><b><FONT size = +1>Version 3.4.2: February 27, 2018</b></FONT>
+
+<p>Input files with experimental data obtained at high <i>T</i>, <i>P</i> and salinity are installed by the phreeqc-installer in c:\phreeqc\high_P_T.
+
+<p>Multicomponent diffusion in stagnant zones now uses the harmonic mean of the cell properties, where earlier versions took the average. If the properties are equal, the results will be identical; if the properties vary, the cells with slow diffusion are now given stronger weight.
+<br>In Example 21 (radial diffusion of tracers through Opalinus Clay), the clay has other properties than the filters that hold the sample. For matching the experimental results, the fit parameters were adapted (CEC, EDL enrichment of <sup>22</sup>Na<sup>+</sup> and Cs<sup>+</sup>, tortuosity of <sup>36</sup>Cl<sup>-</sup>, and the geometrical factor for interlayer diffusion). For neutral species like HTO, the calculations are not affected.
+
+<p>The multicomponent diffusion function was rewritten to include diffusion through the EDL's of all the differently charged surfaces.
+(Earlier versions calculated diffusion through one EDL only, of the first surface in alphabetical order.)
+
+<p>Bug fix with pitzer database, when running with McInnes scaling, but without Cl in the solution.
+
+<p><b><FONT size = +1>Version 3.4.1: February 15, 2018</b></FONT>
+
+<p>For compiling with Visual C++, replaced conditional statements 'if (variable == NAN)' with 'if (isnan(variable))',
+and similar for !=.
+
+<p>Bug fix for calculating density of the initial solution. For example,
+<br>&nbsp;&nbsp;&nbsp;&nbsp;SOLUTION; -units moles/L; Na 1.5; Cl 1.5; -density 1.0 calculate
+<br>will now give:
+<br>&nbsp;&nbsp;&nbsp;Na, Cl 1.549 mol/kgw, Density (g/cm³) = 1.05613
+
+<p>Total Carbon and CO2, when zero, are not printed in "Description of solution".
+
+<p>Print and punch of cells in transport calculations with stagnant zones now follows the order of the cell numbers.
+
+<p>Enabled multicomponent diffusion among boundary and stagnant cells, and of cells within a stagnant layer.
+<br>For example, with 2 cells in the column, 1 stagnant layer: MIX 0; 4 0.5; MIX 4; 5 0.1
+
+<p>In agreement with IAPWS data 0 - 250&deg;C, changed the temperature damping coefficient of Dw for H+ to 1000 in phreeqc.dat and pitzer.dat:
+<br>&nbsp;&nbsp;&nbsp;&nbsp;-dw  9.31e-9  1000  0.46  1e-10
+
+<p>Bug fix for electro-migration through a column (membrane) that contains pure water.
+
+<p>Updated the HELP file.
+
+<p><b><FONT size = +1>Version 3.4.0: November  9, 2017</b></FONT>
+
+<p>Notepad++ installs the phreeqc-adapted files (userDefineLang.xml, shortcuts.xml, session.xml) for all users.
+
+<p>The effect of an electrical field on multicomponent diffusion (electro-migration) is
+calculated with the Nernst-Planck equation if one of the 2 column end-cell solutions has
+a potential different from 0 (SOLUTION 0, SOLUTION cells + 1). For examples of electro-
+migration, see <A href='https://www.hydrochemistry.eu/exmpls/electro_dif.html' class="URL"><i>https://www.hydrochemistry.eu/exmpls/electro_dif.html</i></A>.
+
+<p>A number of new features have been implemented for electro-migration.
+
+<p>(1) The electric potential can be defined in keyword SOLUTION:
+
+<p>SOLUTION 1
+<br>&nbsp;&nbsp;&nbsp;&nbsp;-potential 3 # Volt
+
+
+<p>(2) The electric current in a column experiment can be defined in keyword TRANSPORT:
+
+<p>TRANSPORT
+<br>&nbsp;&nbsp;&nbsp;&nbsp;-current 1e-3 # Ampere
+
+<p>(3) When using -multi_d and -interlayer_d in TRANSPORT, the
+porosity for calculating interlayer diffusion is added to the porosity
+defined with -porosities or -multi_d. For example:
+
+<p>-porosities 0.3 0.29 0.28 ...
+<br>&nbsp;&nbsp;&nbsp;&nbsp;-multi_d true 1e-9 0.3 0.05 1.0 false
+<br>&nbsp;&nbsp;&nbsp;&nbsp;-interlayer_d true 0.07 0.01 250
+
+<p>The total porosities will be 0.37, 0.36, 0.35, ... in cells 1, 2, 3, ...
+<br>In previous versions, the interlayer porosity was subtracted from the porosity
+defined with -multi_d.
+
+<p>(4) If the properties in a regular column (surface areas, lengths, double layers,
+tortuosities, diffusion coefficients) are different for the two cells, the harmonic mean
+is used for calculating the mass transfer (Appelo et al., 2010, Geochim. Cosmochim. Acta
+74, 1201-1219).
+
+<p>(5) The following Basic functions have been added:
+
+<p>CURRENT_A&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# the current through the column, amps.
+<br>POT_V&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# potential in a cell, volts.
+<br>T_SC("Cl-")&nbsp;&nbsp;&nbsp;&nbsp;# The transport- or transference-number of the ion, equal to the fraction of the specific conductance contributed by the species(-).
+<br>VISCOS&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # At present, returns the viscosity of a pure water solution, same as VISCOS_0, milliPascal second.
+<br>VISCOS_0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; # Returns the viscosity of water at current conditions, milliPascal second. Ref.: Huber et al., 2009, J. Phys. Chem. Ref. Data, Vol. 38, 101-125.
+
+
+<p>(6) A temperature damping factor and two parameters for ionic strength dependence were added for
+the calculation of the diffusion coefficient of a solute species:
+
+<p>SOLUTION_SPECIES
+<br>H+ = H+
+<br>&nbsp;&nbsp;&nbsp;&nbsp;-dw  9.31e-9  763  0.46  1e-10
+
+<p>where the first number is the diffusion coefficient at 25 C, and the second number is a damping
+factor for the temperature correction, as proposed by Smolyakov, according to Anderko and Lencka,
+1997, Ind. Chem. Eng. Res. 36, 1932-1943:
+
+<p>Dw(TK) = 9.31e-9 * exp(763 / TK - 763 / 298.15) * TK * 0.89 / (298.15 * viscos).
+
+<p>The ionic strength correction is:
+<br>Dw(I) = Dw(TK) * exp(-0.46 * DH_A * |z_H+| * I^0.5 / (1 + DH_B * I^0.5 * 1e-10 / (1 + I^0.75)))
+
+<p>The correction is applied when the specific conductance is calculated, and can be invoked in electro-migration models, adding TRUE to -multi_d:
+
+<p>-multi_d true 1e-9 0.3 0.05 1.0 TRUE
+
+<p>ColdChem.dat database has been expanded to include sulfate and sulfate
+salts. The database is described in a new journal article by Toner and Catling:
+Journal of Chemical & Engineering Data, 2017,
+http://pubs.acs.org/doi/full/10.1021/acs.jced.7b00265.
+
+<p>Error in dist_x function and in counting of cells for some transport
+problems.
+
+<p>Added new database, core10.dat, contributed by Marc Neveu. The database
+is derived from phreeqc.dat and llnl.dat, with careful data checking,
+use of SUPCRT for temperature dependence, and addition of molar volumes
+for pressure dependence (the pressure dependence is calculated in version 3.8.10, when in LLNL_AQUEOUS_MODEL_PARAMETERS:
+-use_phreeqc_dha_dhb <b>True</b>). Downloaded July 18, 2017 from the following URL
+https://github.com/MarcNeveu/IcyDwarf/blob/master/IcyDwarf/PHREEQC-3.1.2/core10.dat
+
+<p>Please see the following report for details:
+Neveu, Marc, Desch, S.J., and Castillo-Rogez, J.C., 2017, Aqueous geochemistry in
+icy world interiors: Equilibrium fluid, rock, and gas compositions,
+and fate of antifreezes and radionuclides, Geochimica et Cosmochimica Acta,
+v. 212, p. 324-371, http://dx.doi.org/10.1016/j.gca.2017.06.023
+
+<p>Changed the first parameter in the analytical expression for ethane C2H6.
+The negative sign was apparently omitted.
+
+<p>GAMMA and LG functions were not correct
+for exchange species.
+
+<p>Bug fix for when -no_check followed mineral
+name in PHASES. Now catches error if equation does not
+the next line following the mineral name.
+
+<p>Bug fix for -donnan, -debye, and surface related
+to mineral that has zero moles.
+
+<p>Added a new option for a density calculation to SOLUTION
+and SOLUTION_SPREAD. The speciation calculation for a solution is
+iterated until the density used in the conversion of units is the
+same as the density calculated for the solution. It affects solutions
+with concentrations defined as per liter (mg/L, for example).
+<br>Here are three examples for specifying the calculation, where \t
+indicates a tab.
+<br>SOLUTION
+<br>-density 1.1 calculate
+
+<p>SOLUTION_SPREAD
+<br>-density 1.2 calculate
+
+<p>SOLUTION_SPREAD
+<br>pH\t        density\t
+<br>charge\t    calculate\t
+<br>7.0\t       1.03\t
+<br>If the calculation is performed, the density in the description of
+solution part of the output will be identified with "(Iterated)".
+
+<p>Added new Basic function TITLE, which returns the last
+definition by a TITLE keyword data block.
+
+<p><b><FONT size = +1>Version 3.3.11: March 10, 2017</b></FONT>
+<p>Added the ColdChem.dat database developed by Toner and
+Catling, Journal of Chemical & Engineering Data, 2017, DOI: 10.1021/
+acs.jced.6b00812. It is a comprehensive Pitzer model in the Na-K-Ca-Mg-
+Cl system valid for low temperature, from 298.15 to < 200 K.
+PHREEQC was modified to allow definition of the temperature dependence
+of A(phi) in the Pitzer formulation through a new option, -APHI, in
+the PITZER keyword. The coefficients of the APHI expression are the
+same as the temperature dependence of other Pitzer parameters.
+A new Basic function, APHI, has been added to give the value of
+<br>the parameter in the current calculation.
+
+<p>Added logic to limit the range of the fugacity coefficient.
+
+<p>Change to avoid potential NULL pointer in -multi_D
+calculations.
+
+<p>Error check that the same element name was not used for
+both a SURFACE and EXCHANGE, which caused a NULL pointer.
+Some variables in the unknown structure are now initialized.
+
+<p>PhreeqcRM: The Fortran version of RM_SpeciesConcentrations2Module did
+not provide the correct return value. Generally, -3 was returned
+(IRM_INVALIDARG), even if the method worked properly and should have
+returned 0 (IRM_OK).
+
+<p><b><FONT size = +1>Version 3.3.10: January 12, 2017 </b></FONT>
+<p>Updated Basic function SYS("equi"...). The function now gives
+the correct amounts of equilibrium phases at the end of a reaction.
+Previously, the function erroneously gave the amounts of equilibrium
+phases before reactions.
+
+<p><b><FONT size = +1>Version 3.3.9: November 15, 2016 </b></FONT>
+<p>Updated sit.dat to version 9b0 from www.thermochimie-tdb.com. Changed
+documentation of some RATES definitions in Amm.dat to have the correct diameter
+assumed for mineral grains.
+
+<p>Bug when surface was related to kinetics and the proportion of sites to
+kinetic reactant was zero (not common). The bug caused a segmentation-fault crash.
+
+<p>PhreeqcRM: Previously, the guess for the unknown for mass of water was the value
+from the last time step. For widely varying saturations, the old value
+caused non-convergence for the cell. Now the mass of water is estimated from the
+updated value of the moles of oxygen in the cell.
+
+<p><b><FONT size = +1>Version 3.3.8: September 13, 2016 </b></FONT>
+
+<p>PhreeqcRM: Added comment to output that user-grid cell numbers are 0 based (C-like).
+
+<p>PhreeqcRM: Removed tabs from RM_interface.F90.
+
+<p>Fixed a potential bug where memcpy target and source locations
+overlapped.
+
+<p>Implemented some changes for redox calculations with the Pitzer model.
+Revising master variable values when large concentrations occur, and basis
+switching between redox environments. Algorithm for initial estimates of
+variables was also changed, as well as removing activity coefficient equations
+when not needed.
+
+<p>The file dw.cpp was removed from the source code. It contained obsolete
+code inherited from PHRQPITZ to calculate the density of water.
+
+<p>PhreeqcRM: Order of header files was changed to put mpi.h first to avoid potential header
+conflicts with some MPI implementations.
+
+<p>The Peng-Robinson gas calculation failed with very small gas partial pressures.
+Code was modified to set a minimum of 1e-10 atm for the calculation.
+
+<p>PhreeqcI: File/registry virtualization was disabled. Windows allowed users to write into
+system directories (Program Files for instance) even though they did not have sufficient
+permissions. The files were actually stored in another directory in the user's profile.
+The files are difficult to find, and, under some conditions, PhreeqcI would fail. Now,
+it is not allowed to write into directories for which the user does not have write
+permission.
+
+<p>Added new Basic function PHASE_VM("Calcite"). The function returns the molar volume
+for a mineral. The molar volume is defined for the mineral in PHASES with the -vm option.
+Use the Basic function GAS_VM for gas components.
+
+<p>Added two new Basic functions related to KINETICS.
+
+<p>n$ = KINETICS_FORMULA$("Albite", count, elt$, coef)
+
+<p>This function searches for a kinetic reaction definition (Albite, in the example). If found, n$
+is set equal to the first argument (Albite), otherwise an empty string is returned. The
+function returns these values: count is the number of items in the arrays elt$ and coef; elt$
+is a list of element names in the formula for the kinetic reaction; and coef is a numeric
+array containing the number of atoms of each element in the kinetic-reaction formula, in the
+order defined by elt$, which is alphabetical by element.
+
+<p>m = SYS("kin", count , name$ , type$ , moles)
+
+<p>This function identifies all of the kinetic reactants in the current KINETICS definition
+and returns the sum of moles of all kinetic reactants. Count is number of kinetic
+reactants. Name$ contains the kinetic reactant names. Type$ is "kin". Moles contains the
+moles of each kinetic reactant. The chemical formula used in the kinetic reaction can be
+determined by using a reaction name from Name$ as the first argument of the
+KINETICS_FORMULA$ Basic function.
+
+<p>Updated the online manual
+(http://wwwbrr.cr.usgs.gov/projects/GWC_coupled/phreeqc/phreeqc3-html/phreeqc3.htm)
+to have revisions noted in italic text and better graphics for figures.
+
+<p><b><FONT size = +1>Version 3.3.7 April 21, 2016</b></FONT>
+
+<p>Cerussite misspelled in 5 databases (Amm, minteq, minteq.v4, phreeqc, and wateq4f.
+Modified Calcite RATES to handle M0=0. Added rate for quartz to wateq4f.dat.
+
+<p>PhreeqcI: The selected-output file was missing headers under some conditions, for example
+: SOLUTION;SELECTED_OUTPUT;END.
+
+<p>PhreeqcI: Fixed bug that overwrote selected output files when (re-)opening a .pqi file
+
+<p><b><FONT size = +1>Version 3.3.6 April 18, 2016</b></FONT>
+<p>PhreeqcRM: InitialPhreeqcCell2Module method had incorrect indexing when using a mapping of model
+cells to chemistry cells that was not 1-to-1. The result was incorrect values for porosity, rv, and
+saturation.
+
+<p>Additional error checking. In SOLUTION_MASTER_SPECIES the master species must contain the
+element name.
+
+<p>If an aqueous species lacked a molar volume parameter (Vm), then the change in molar volume
+for reactions involving that species were not calculated correctly. Now summations of molar volumes,
+including zero for the species, are calculated.
+
+<p>Added Vm values for Gibbsite, Kaolinite, Albite, Anorthite, K-feldspar, Ca-Montmorillonite,
+Talc, Illite, Chrysotile, Sepiolite, Hematite, Goethite, Pyrite, and Mackinawite for the phreeqc.dat
+and Amm.dat databases.
+
+<p>PHREEQC and PhreeqcI: PhreeqcI has updated documentation through the Help menu. All entries in green
+font are modifications, corrections, or new features.
+
+<p>Corrected description of "EQUI" option of the SYS function.
+
+<p>-porosities is now an option in TRANSPORT for defining a heterogeneous distribution of porosity for
+-multi_d calculations.
+
+<p>RHO_0 is a new Basic function that gives the density of pure water at the current temperature.
+
+<p>EDL_SPECIES(surf$, count, name$, moles, area, thickness)
+
+<p>Returns the total number of moles of species in the diffuse layer. The arguments to the function are
+as follows: surf$ is the name of a surface, such as "Hfo", excluding the site type (such as "_s");
+count is the number of species in the diffuse layer; name$ is an array of size count that contains
+the names of aqueous species in the diffuse layer of surface surf$; moles is an array of size count
+that contains the number of moles of each aqueous species in the diffuse layer of surface surf$;
+area is the area of the surface in m^2; thickness is the thickness of the diffuse layer in m. The
+function applies when -donnan or -diffuse_layer is defined in SURFACE calculations.
+
+<p>Corrected description of "EQUI" option of the SYS function.
+
+<p>Corrected description of "EQUI" option of the SYS function. PhreeqcI has updated
+documentation through the help. All entries in green font are modifications, corrections, or new
+features.
+
+<p>PhreeqcI: Changed the way the current working directory is set. Now, the current working directory
+is not changed when browsing for and changing the database.
+
+<p>PhreeqcI: SOLUTION_SPREAD did not import correctly when using the P4W tab of PhreeqcI to generate
+the an example problem.
+
+<p>In converting units of mass to moles per kilogram of water, it is possible to calculate a negative
+mass of water. This problem is now trapped, and an error message is issued.
+
+<p><b><FONT size = +1>Version 3.3.5 February 3, 2016</b></FONT>
+
+<p>Created an option to enter cell porosities in keyword TRANSPORT, which was
+motivated by the need to define porosities for a variable-porosity multicomponent diffusion
+problem. Previously the Basic function CHANGE_POR had to be used to allow variable porosity.
+
+<p>-porosities 0.3 0.29 0.28  # porosities of cells 1, 2, 3-n, used for calculating
+tortuosity in multicomponent diffusion calculations. The
+numbers entered here take precedence over the value given
+with -multi_D. If one stagnant layer is defined together with
+an exchange-factor > 0 ('-stagnant 1 4e-6 0.3 0.1'), the
+mobile (here = 0.3) and immobile (here = 0.1) porosities
+defined with -stagnant are used.
+
+<p>IPhreeqc: Added optional argument sl to GetSelectedOutputValue in Fortran. The revised method
+is as follows, where sl is a new optional argument.
+
+<p>CHARACTER(LEN=40) :: sv
+<br>status = GetSelectedOutputValue(id, i, j, vt, dv, sv, sl)
+
+<p>In the example, if the character string generated in IPhreeqc and stored in sv is 40 characters or
+less, the value of sl will be 0. If the character string generated in IPhreeqc was greater than
+40 characters, the truncated string is stored in sv, but the value of sl will contain the length
+of the string before truncation.
+
+<p>All programs: Now using Jenkins for continuous integration.
+
+<p>Erroneous input could cause a segmentation fault for surfaces
+related to minerals or kinetics.
+
+<p>Minor format change for specific conductance.
+
+<p>PhreeqcRM: Advection example in C and C++ had wrong MPI type for integer transfers.
+Example code in documentation also had wrong MPI type for some integer transfers.
+Integer transfers in Fortran should use MPI_INTEGER, while integer transfers in
+C and C++ should use MPI_INT.
+
+<p>PhreeqcRM: Revised transfer of data for MPI when re-balancing. Serializes lists of
+characters, integers, and doubles, instead of writing full "dump" version of each
+reaction. Is much faster for cell transfers when re-balancing among processes.
+
+<p>PhreeqcRM: Fixed bug when transferring data for MPI. Surface related to kinetics lost
+concentrations of sorbed elements.
+
+<p>New set of convergence parameters that delay the removal of an unstable
+phase by 1 iteration. Also new KNOBS identifier, -equi_delay n, where n is the
+number of iterations to retain an unstable phase.
+
+<p>Comments for K-spar and Albite RATES were incorrect for phreeqc.dat and
+wateq4f.dat
+
+<p>PhreeqcRM: Provided better error message for CreateMapping errors.
+
+<p><b><FONT size = +1>Version 3.3.3 October 23, 2015</b></FONT>
+<p>PhreeqcRM: C function clock() does not provide sufficient resolution. Efficiency calculation
+generated NaN, and re-balancing was poor. Revised to use MPI and OpenMP timers when available.
+
+<p>PhreeqcRM: Efficiency calculation generated NaN for OpenMP calculations.
+
+<p>Fixed formula for pressure dependence of B1, B2, F1, F2 in the Pitzer formulation.
+Previously had a limit of -10C; temperatures less than -10 produced a floating point exception
+and convergence failure.
+
+<p>IPhreeqc and PhreeqcRM: Debug version asserted when trying to write an error message to std::cerr.
+
+<p>PhreeqcRM: Added methods and documentation for RM_GetEndCell and RM_GetStartCell for C and Fortran.
+C++ methods already existed. The methods give the range of chemistry cell numbers that are assigned
+by each worker (OpenMP) or process (MPI). If re-balancing is enabled, these numbers may change as
+cells are shifted among workers or processes.
+
+<p><b><FONT size = +1>Version 3.3.2 October 2, 2015</b></FONT>
+<p>PhreeqcRM: Bug in configure scripts required developer zlib to be installed. Now
+zlib is only needed if the --with-zlib option is given in order to write compressed
+dump files (USE_GZ).
+
+<p>Fixed bug with SOLUTION_SPREAD. Element names starting with "[" were
+not handled correctly.
+
+<p>Handled case where GAS_PHASE components were not defined in PHASES.
+
+<p>New R version submitted.
+
+<p>PhreeqcRM: Added new method SetScreenOn (RM_SetScreenOn) to control messages
+about re-balancing and any messages written with ScreenMessage (RM_ScreenMessage).
+
+
+</font>
+
+</BODY>
+</html>
