@@ -318,8 +318,8 @@ AmmH+ = Amm + H+
 	-dw 2.28e-9
 AmmH+ + SO4-2 = AmmHSO4-
 #NH4+ + SO4-2 = NH4SO4-
-	-gamma 7 -7.36e-2
 	-log_k 1.353; -delta_h 3.91 kcal
+	-gamma 7 -7.36e-2
 	-Vm 6.27 8.5 8.77 -3.1 2 0 5.53 0 1.98e-2 0.475
 	-viscosity 1.251 -1.065 8.64e-4 6.186e-2 -1e-3 0.933 0.543
 	-dw 1.35e-9 500 12.5 0.5 0.256
@@ -1363,7 +1363,7 @@ EXCHANGE_SPECIES
 	-delta_h 1.4 # Merriam & Thomas, 1956
 
 # !!!!!
-#	  H+ + X- = HX
+#	  H+ + X- = HX # better: active fraction model, see https://hydrochemistry.eu/exmpls/a_f.html
 #	  -log_k  1.0
 #	  -gamma  9.0	0
 
