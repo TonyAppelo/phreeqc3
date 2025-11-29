@@ -40,7 +40,6 @@ N(+5)       NO3-    0   N
 N(+3)       NO2-    0   N
 N(0)        N2      0   N
 N(-3)       NH4+    0   N               14.0067
-#Amm        AmmH+   0   AmmH            17.031
 B           H3BO3   0   B               10.81
 P           PO4-3   2   P               30.9738
 F           F-      0   F               18.9984
@@ -152,11 +151,6 @@ NO3- = NO3-
 	-Vm 6.32 6.78 0 -3.06 0.346 0 0.93 0 -0.012 1
 	-viscosity 8.37e-2 -0.458 1.54e-2 0.34 1.79e-2 5.02e-2 0.7381
 	-dw 1.9e-9 104 1.11
-#AmmH+ = AmmH+
-#	-gamma 2.5 0
-#	-Vm 5.35 2.345 3.72 -2.88 1.55 2.5 -4.54 217 2.344e-2 0.569
-#	-viscosity 6.94e-2 -0.141 2.04e-2 9.4e-3 3.73e-2 0.898
-#	-dw 1.98e-9 203 1.47 2.644 6.81e-2
 H3BO3 = H3BO3
 	-Vm 7.0643 8.8547 3.5844 -3.1451 -0.2 # supcrt
 	-dw 1.1e-9
@@ -300,13 +294,12 @@ NO3- + 2 H+ + 2 e- = NO2- + H2O
 	-Vm 7 # Pray et al., 1952, IEC 44 1146
 	-dw 1.96e-9 -90 # Cadogan et al. 2014, JCED 59, 519
 NO3- + 10 H+ + 8 e- = NH4+ + 3 H2O
-	  -log_k  119.077
-	  -delta_h -187.055	  kcal
+	-log_k  119.077
+	-delta_h -187.055	  kcal
 	-gamma 2.5 0
 	-Vm 5.35 2.345 3.72 -2.88 1.55 2.5 -4.54 217 2.344e-2 0.569
 	-viscosity 6.94e-2 -0.141 2.04e-2 9.4e-3 3.73e-2 0.898
 	-dw 1.98e-9 203 1.47 2.644 6.81e-2
-#AmmH+ = Amm + H+
 NH4+ = NH3 + H+
 	-log_k -9.252
 	-delta_h 12.48 kcal
@@ -314,13 +307,12 @@ NH4+ = NH3 + H+
 	-Vm 6.69 2.8 3.58 -2.88 1.43
 	-viscosity 0 -2.24e-2 0.101 8.66e-3 2.86e-2 -0.143 -0.769
 	-dw 2.28e-9
-#AmmH+ + SO4-2 = AmmHSO4-
 NH4+ + SO4-2 = NH4SO4-
-	-gamma 3.64 -4.75e-2
-	-log_k 1.276; -delta_h -3.24 kcal
-	-Vm 6.64 8.5 -5.84 -3.1 2 0 19.24 0 -7.84e-2 0.289
-	-viscosity 0.267 -0.207 9.75e-2 6.18e-2 1.99e-2 1.166 0.61
-	-dw 1.56e-9 498 25 0.5 0.684
+	-gamma 7 -7.36e-2
+	-log_k 1.353; -delta_h 3.91 kcal
+	-Vm 6.27 8.5 8.77 -3.1 2 0 5.53 0 1.98e-2 0.475
+	-viscosity 1.251 -1.065 8.64e-4 6.186e-2 -1e-3 0.933 0.543
+	-dw 1.35e-9 500 12.5 0.5 0.256
 H3BO3 = H2BO3- + H+
 	-log_k -9.24
 	-delta_h 3.224 kcal
@@ -1244,8 +1236,6 @@ CH4(g)
 	-log_k -2.8
 	-analytic 10.44 -7.65e-3 -6669 0 1.014e6 # CH4 solubilities 25 - 100°C
 	-T_c 190.6; -P_c 45.4; -Omega 0.008
-#Amm(g)
-#	Amm = Amm
 NH3(g)
 	NH3 = NH3	
 	-log_k 1.7966
@@ -1362,11 +1352,10 @@ EXCHANGE_SPECIES
 	-delta_h 1.4 # Merriam & Thomas, 1956
 
 # !!!!!
-#	  H+ + X- = HX
-#	  -log_k  1.0
-#	  -gamma  9.0	0
+#	H+ + X- = HX # better use: active fraction model, see https://hydrochemistry.eu/exmpls/a_f.html
+#	-log_k  1.0
+#	-gamma  9.0	0
 
-#	AmmH+ + X- = AmmHX
 	NH4+ + X- = NH4X
 	-log_k 0.6
 	-gamma 2.5 0
