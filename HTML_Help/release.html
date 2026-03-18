@@ -11,27 +11,40 @@
 </center></FONT>
 <FONT COLOR="black"  size = -1>
 
-<p><b><FONT size = +1>Pre-release notes</b></FONT>
+<!-- <p><b><FONT size = +1>Pre-release notes</b></FONT> -->
+<p><b><FONT size = +1>Version 3.8.10, compiled March 16, 2026.</b></FONT>
+
+<!-- <p>The temperature factor for the diffusion coefficient of Na+ must be adapted to improve the calculation of the specific conductance (SC) of NaCl solutions for tc > 150 ºC, the calculated SC is smaller than measured at 200 and 300 ºC by Quist and Marshall, 1968, JPC 72, 648. Maybe, adding a another TK term in Dw(TK) = Dw_298 * exp(838 / TK - 838 / 298.15) * viscos_0_25 / viscos_0_tc.
+ -->
+<p>Corrected an error in the A-factor of Falkenhagen's equation for the relative viscosity, viscos / viscos_0 = 1 + A c<sup>0.5</sup>. It may affect the calculated viscosity a few permilles.
+
+<p>In SOLUTION input, if a blank value is given for pH, pe, an element, temperature, density, or units, the input line is ignored.
+ 
+<p>Revised -vm, -viscosity and -dw for carbonate species in PHREEQC.DAT and PITZER.DAT for better <i>T, P</i>, and <i>I</i> calculations using data from Abdulagatov et al., 2007, Z. Phys. Chemie 221, 963.
+
+<p>The solute contributions to viscosity are now calculated up to 300 ºC when the model calculates a viscosity increase by solutes for tc > 180 ºC. Previous versions limited the solute contributions to temperatures below 200 ºC.
+<!-- changes in transport.cpp and print.cpp -->
 
 <p>Updated <b>PHREEQC.DAT</b>: SOLUTION_SPECIES: F-, NaF, KF, using high P, T using data from Majer et al., 1997, JSC 26, 847. PHASES: Fluorite, solubility data from Strübel, 1965, NJbM,M 83-95; Henry, 2018, PhD, Colorado School of Mines.
 <p>Updated <b>PITZER.DAT</b>: SOLUTION_SPECIES: SO4-2
 <p>Updated <b>PHREEQC.DAT</b>: SOLUTION_SPECIES: SO4-2, NaSO4-, Na2SO4, KSO4-, MgSO4, Mg(SO4)2-2, AmmHSO4-
 <p>Modified viscosity parameters for Br-, using high temperature data from Abdulagatov and Azizov, 2006, J.S.C. 35, 705 (NaBr), and 2008, J.S.C 37, 3 (KBr).
+
 <p><FONT COLOR="red">New</font> option <FONT COLOR="magenta"><b>-use_phreeqc_dha_dhb</b></font> [<b><i>True</i></b> or <b><i>False</i></b>] was added to the keyword data block LLNL_AQUEOUS_MODEL_PARAMETERS:
 <p>LLNL_AQUEOUS_MODEL_PARAMETERS
-<br><b>-use_phreeqc_dha_dhb <i>True</i></b>
+<br><b><FONT COLOR="magenta">-use_phreeqc_dha_dhb</font> <i>True</i></b>
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AA; Debye-Hückel A and B values and the density of pure water are calculated pressure- and temperature-dependent as done with phreeqc.dat and pitzer.dat
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AA; the value of <i>bdot</i> can be defined for individual SOLUTE_SPECIES as in phreeqc.dat with -gamma <i>adot</i> <i>bdot</i>
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AA; the value of <i>bdot</i> can be defined for individual SOLUTE_SPECIES as in phreeqc.dat with -gamma <i>&aring;</i> <i>bdot</i>
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AA; the density of the solution is calculated using the molar volume parameters (-Vm) in SOLUTION_SPECIES
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AA; the pressure dependence of log <i>K</i>'s is calculated from the molar volume parameters in SOLUTION_SPECIES and PHASES
 
-<P><b>-use_phreeqc_dha_dhb <i>False</i></b>
+<P><b><FONT COLOR="magenta">-use_phreeqc_dha_dhb</font> <i>False</i></b>
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AA; gives results as previously with a llnl-type database, <i>i.e.</i>
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AB; Debye-Hückel A and B are calculated temperature-dependent by interpolating the numbers in -dh_a and -dh_b in the LLNL_AQUEOUS_MODEL_PARAMETERS
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AB; the value of <i>bdot</i> is the same for all aqueous species, from interpolating the numbers in -bdot in the LLNL_AQUEOUS_MODEL_PARAMETERS
-<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AB; -Vm values are not used for calculating the pressure dependence of reactions and, if present, solution densities are not correct
-<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If <b>-use_phreeqc_dha_dhb</b> is written without True or False, True is assumed; if not written at all, the option is False.
-<br>The option is useful for calculating the pressure-dependent solubility of solids and gases, and extending the llnl-type database to higher ionic strengths. For example try:
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#x25AB; -Vm values are not used for calculating the pressure dependence of reactions and, if present, the calculated solution densities are not correct.
+<p>If <b>-use_phreeqc_dha_dhb</b> is written without True or False, True is assumed; if not written at all, the option is False.
+<br>The option is useful for calculating the pressure-dependent solubility of solids and gases, and extending the llnl-type databases to higher ionic strengths. For example try:
 <table><tr><td>
 <pre><b><font size = -1>  <FONT COLOR="blue">DATABASE</font> c:\phreeqc\database\llnl.dat
   <FONT COLOR="blue">LLNL_AQUEOUS_MODEL_PARAMETERS</font>; <FONT COLOR="magenta">-use_phreeqc_dha_dhb</font> 
@@ -65,10 +78,8 @@
     70 plot_xy pressure * 1.013, c2(step_no), line_width = 0, color = Red
   <FONT COLOR="blue">END</font>
 </font>
-</b></pre></td>
-<TD>
-   <IMG SRC="halite_T&P.png"HEIGHT = 456 WIDTH = 282></IMG>
-</td></tr></table>
+   <IMG SRC="Halite_PTI.png"HEIGHT = 291 WIDTH = 692></IMG>
+</b></pre></td></tr></table>
 
 <p>Corrected -Vm of K-mica in PHREEQC.DAT.
 <p>Added -Vm and modified -viscosity of SOLUTION_SPECIES HCl in PHREEQC.DAT.
@@ -78,7 +89,8 @@
 <p>Adapted H<sub>2</sub> and Hdg properties in SOLUTION_SPECIES and PHASES in PHREEQC.DAT and PITZER.DAT for improved solubility calculations at high <i>T, P</i>, and <i>I</i>.
 <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;File <b>c:\phreeqc\high_P_T\gases\H2.phr</b> compares calculations and measured data.
 
-<p>Revised the data for carbonate species in PHREEQC.DAT and PITZER.DAT for better <i>T, P</i>, and <i>I</i> dependent calcite equilibrium and viscosity calculations: <br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;run the files in <b>c:\phreeqc\high_P_T\appendix_AG15\Calcite</b>.
+<p>Revised the data for carbonate species in PHREEQC.DAT and PITZER.DAT for better <i>T, P</i>, and <i>I</i> dependent calcite equilibrium and viscosity calculations: 
+<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;run the files in <b>c:\phreeqc\high_P_T\appendix_AG15\Calcite</b>.
 
 <p>Updated <b>PITZER.DAT</b>: 
 <UL><li> SOLUTION_SPECIES: Mg+2, Ba+2, CO3-2, Hdg, HCO3-, CO2. 
