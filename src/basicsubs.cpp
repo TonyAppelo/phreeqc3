@@ -507,6 +507,8 @@ calc_SC(void)
 				else
 					// with a mu^dw_a2 correction of a..
 					ka = DH_B * a * pow((double)mu_x, a2);
+				if (ka < -0.9) 
+					ka = -0.9;
 
 				t1 = (Dw - B2 * l_z * sqrt_mu / (1 + ka)) *
 					(1 - B1 * sqrt_mu / ((1 + ka) * (1 + ka)));// +ka * ka / 6))); // S.cm2/eq / (kgw/L)

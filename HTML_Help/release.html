@@ -11,7 +11,23 @@
 </center></FONT>
 <FONT COLOR="black"  size = -1>
 
+
+
 <!-- <p><b><FONT size = +1>Pre-release notes</b></FONT> -->
+<p><b><FONT size = +1>Version 3.9.0, compiled June 10, 2026.</b></FONT>
+
+<p>Revised -viscosity and -dw for NO3- and SO4-2 species in PHREEQC.DAT, using high temperature data from Abdulagatov and Azizov, 2005, JSC 34, 645
+
+<p>Limited the value of ka to be > -0.9 in the phreeqc version of the Falkenhagen equation for the specific conductance (calc_SC(void) in basicsubs.cpp).
+
+<p>Revised -viscosity for MgSO4 species in PHREEQC.DAT. 
+
+<p>Revised -viscosity for Ca+2 in PHREEQC.DAT and PITZER.DAT. 
+
+<p>Revised -vm, -viscosity and -dw for carbonate species in PHREEQC.DAT and PITZER.DAT for better <i>T, P</i>, and <i>I</i> calculations. 
+
+<p>Adapted the anion factor fan in the viscosity calculation for high temperatures.
+
 <p><b><FONT size = +1>Version 3.8.10, compiled March 16, 2026.</b></FONT>
 
 <!-- <p>The temperature factor for the diffusion coefficient of Na+ must be adapted to improve the calculation of the specific conductance (SC) of NaCl solutions for tc > 150 ºC, the calculated SC is smaller than measured at 200 and 300 ºC by Quist and Marshall, 1968, JPC 72, 648. Maybe, adding a another TK term in Dw(TK) = Dw_298 * exp(838 / TK - 838 / 298.15) * viscos_0_25 / viscos_0_tc.

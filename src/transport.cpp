@@ -6192,6 +6192,15 @@ viscosity(cxxSurface *surf_ptr)
 					t2 = -0.8 / s_x[i]->Jones_Dole[5];
 				else
 					t2 = -1;
+//try
+				if (s_x[i]->Jones_Dole[5] >= 1)
+						t2 = l_mu_x / 3 / s_x[i]->Jones_Dole[5];
+				else if (s_x[i]->Jones_Dole[5] > 0.8)
+					t2 = -0.8 / s_x[i]->Jones_Dole[5];
+				else if (s_x[i]->Jones_Dole[5] > 0.6)
+					t2 = -1 / (1.6 - s_x[i]->Jones_Dole[5]);
+				else
+					t2 = -1;
 				t3 = (s_x[i]->Jones_Dole[3] * exp(-s_x[i]->Jones_Dole[4] * tc_x)) *
 					t1 * (pow(l_mu_x, s_x[i]->Jones_Dole[5])*(1 + t2) + pow(t1 * f_z, s_x[i]->Jones_Dole[5])) / (2 + t2);
 				if (t3 < -1e-5)
@@ -6260,31 +6269,32 @@ viscosity(cxxSurface *surf_ptr)
 		else
 			A = 0;
 		viscos = viscos_0 + A * sqrt((eq_plus + eq_min) / 2 / l_water);
+
 		if (m_an)
 			V_an /= m_an;
-		if (!V_Cl)
-		{
-			V_Cl = calc_vm_Cl();
-			if (V_Cl < 1) V_Cl = 1;
-		}
-		if (V_an == V_Cl)
+		if (fabs(V_an - V_Cl) < 1e-2)
 			fan = 1;
-		else if (V_Cl >= 1)
-			fan = 2 - V_an / V_Cl;
 		else
-			fan = 2 - V_an * mu_x;
-		//if (fan < -1) 
-		//	fan = -1; // provisional...
+		{
+			if (!V_Cl)
+			{
+				V_Cl = calc_vm_Cl();
+				if (V_Cl < 1) V_Cl = 1;
+			}
+			if (V_Cl > 1 && (fan = 2 - V_an / V_Cl) > 0.05)
+				;
+			else if ((fan = 2 - V_an * mu_x) > 0.05)
+				;
+			else
+				fan = 0.05;
+			if (fan > 0.05 && tc_x > 200 && V_an < 1)
+				fan = 0.05;
+		}
 		viscos += viscos_0 * fan * (Bc + Dc);
 		if (viscos < 0)
 			viscos = viscos_0; // may occur while optimizing
-		if (tc_x > 180 && viscos < viscos_0)
-		{
-			//snprintf(token, sizeof(token),
-			//	"viscosity (%.4f) < viscos_0 (%.4f) at %.1f °C, reset to viscosity of pure water", (double) viscos, viscos_0, tc_x);
-			//warning_msg(token);
+		if (tc_x > 180 && viscos < viscos_0) // a final check...
 			viscos = viscos_0;
-		}
 
 	highT:
 		if (!surf_ptr)
