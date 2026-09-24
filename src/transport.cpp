@@ -6358,8 +6358,11 @@ viscosity(cxxSurface* surf_ptr)
 		{
 			t2 = (viscos - l_viscos_0 - l_A) / l_viscos_0;
 			viscos = viscos_0 + A + viscos_0 * t2 * exp(-tc_fac * (tc_x - l_tc_x));
+		}
+		if (tc_x > 150)
+		{
 			t2 = viscos_0 * (1 + mu_x / tk_x);
-			if (viscos < t2 && (eq_min + eq_plus) > mu_x / 1e1) // the eq_ term added in case Dw's = 0
+			if (viscos < t2 && (eq_min + eq_plus) > mu_x / 1e2) // the eq_ term added in case Dw's = 0
 				viscos = t2;
 		}
 
