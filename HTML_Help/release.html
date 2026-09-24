@@ -14,6 +14,23 @@
 
 
 <!-- <p><b><FONT size = +1>Pre-release notes</b></FONT> -->
+
+<p><b><FONT size = +1>Version 3.9.1, compiled September 23, 2026.</b></FONT>
+
+<p>Revised the viscosity calculation above a limiting temperature, which lets the viscosity of the B and D terms in the Jones-Dole equation decrease in uniform manner for all species by exp(-tc_fac * (tc_x - tc_lim)). It improves the results for viscosity and specific conductance notably when anions other than Cl<sup>-</sup> are present, because the volume term for anions and gas- and neutral species is bypassed (the volume term may change sign, and and give erratic results if uncorrected). The defaults are tc_lim = 150ºC and tc_fac = 2.25e-4. Values can be changed in the -viscosity numbers for H+ in SOLUTION_SPECIES (Jones_Dole[7] and [8], these numbers need to be non-negative):
+<table><tr><td>
+<pre>
+<FONT COLOR="blue">SOLUTION_SPECIES</font>
+H+ = H+
+	-gamma 9 0
+<FONT COLOR="green">	#                                                 Jones_Dole[7]  [8]</font>
+	-viscosity 9.35e-2 -8.31e-2 2.487e-2 4.49e-4 2.01e-2 1.57 0 150 2.25e-4
+	-dw 9.31e-9 838 6.96 -2.285 0.206 24.01 0
+</pre></td></tr></table>
+Viscosity parameters in phreeqc.dat and pitzer.dat have been adapted to the new model structure.
+<p>Updated the solubility of Pb(OH)<sub>2</sub> in wateq4f.dat and minteq.v4.dat.
+
+
 <p><b><FONT size = +1>Version 3.9.0, compiled June 10, 2026.</b></FONT>
 
 <p>Revised -viscosity and -dw for NO3- and SO4-2 species in PHREEQC.DAT, using high temperature data from Abdulagatov and Azizov, 2005, JSC 34, 645
